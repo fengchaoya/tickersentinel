@@ -1,0 +1,59 @@
+# 主题「存储芯片」：一个板块的联动关系（MU / SNDK / SKHY 共用）。在 config/assets.yaml 里给持仓写 theme: memory 就生效；
+# 没有持仓引用它时整个主题不生效（不取数据、不收集事件、不推送）。正在运行的 `tsen run` 一分钟内自动读到；`tsen scope` 查看当前的监控范围。
+#
+# 各段的用途（不需要的段可以整段删掉）：
+#   benchmark   板块基准：拆分“板块联动 / 个股特异”的 β。写 ETF / 指数代码，或 basket（下面 peers 里美股的等权篮子）
+#   peers       同涨同跌的同业：推送里的“同期”对比、归因判断是不是板块一起动、事件日历收集它们的财报
+#   overnight   夜间信号：美股休市时在交易的海外标的，自动成为“只盯盘”的资产；它们大涨大跌时推送并注明是谁的夜间信号
+#   catalysts   催化剂公司（大客户、供应商……）：平时不一定同涨同跌，但财报会牵动这个板块 → 只进事件日历和归因
+#   news        板块新闻的检索词（按语言）
+#   indicators  板块指标：附在这个板块的异动推送里（基础宏观变量——利率、原油、金银、大盘——在 settings.yaml 的 macro）
+#   note        补充背景，写进提示词
+#
+# 2026-10-23 实测（近一年日线）：SKHY 对 SOXX 的 R² 0.60，对同业等权篮子（MU/SNDK/WDC）0.70；
+# 首尔 000660.KS 当天涨跌与 SKHY 次日开盘跳空的偏相关 0.74（剔除 SKHY 前一天涨跌后）。
+
+name: 存储芯片
+focus: 存储芯片（DRAM / NAND / HBM）
+benchmark: SOXX                  # 费城半导体 ETF
+
+peers:
+  WDC: 西部数据
+  "005930.KS": 三星电子
+  "285A.T": 铠侠
+
+overnight:                       # 美东约 20:00–02:30 的首尔 / 东京时段，替持仓盯着
+  "000660.KS": SK海力士(首尔)     # SKHY 的主上市正股（10 份 ADR = 1 股）
+  "005930.KS": 三星电子            # 三星和海力士的日收益相关 0.87（近一年），常常同涨同跌
+  "285A.T":                       # 东京，和首尔同一时段；和闪迪合资经营闪存工厂。东京只有它一只，单独触发
+    name: 铠侠
+    alert: {rapid_pct: {5: 1.9, 15: 3, 30: 3.5, 60: 3.5}, day_pct: [6, 10, 15]}  # 日波动 σ≈6.2%（海力士 4.5%），按 σ/5% 换算
+
+catalysts:
+  # 云厂商：资本开支指引 = AI 服务器、HBM 与企业级 SSD 的需求
+  MSFT: 微软
+  GOOGL: 谷歌
+  AMZN: 亚马逊
+  META: Meta
+  ORCL: 甲骨文
+  # AI 芯片与代工：HBM 的直接买家、先进封装产能
+  NVDA: 英伟达
+  AMD: AMD
+  AVGO: 博通
+  TSM: 台积电
+  # 存储同业（不在上面 peers 里的）
+  STX: 希捷
+  # 半导体设备：存储厂扩产 / 资本开支的风向标
+  LRCX: 泛林
+  ASML: 阿斯麦
+  # 终端：手机、PC 的存储需求
+  AAPL: 苹果
+
+news:
+  en: ["DRAM prices", "NAND flash prices", "HBM memory chips"]
+  ko: ["D램 가격", "낸드 가격"]
+  zh: ["存储芯片 涨价"]
+
+indicators:
+  - {key: krw, name: 美元/韩元, symbol: "KRW=X", group: 存储芯片, kind: level, ref: 24h}     # 韩元走势影响三星、海力士的盈利与外资流向
+  - {key: kospi, name: KOSPI, symbol: "^KS11", group: 存储芯片, kind: level, ref: close}     # 韩国大盘：三星 + 海力士占很大权重

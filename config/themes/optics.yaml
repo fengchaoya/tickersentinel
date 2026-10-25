@@ -1,0 +1,50 @@
+# 主题「光模块」：示例配置里的 LITE 引用它（config/assets.yaml 里写 theme: optics）。没有持仓引用时整个主题不生效。
+# LITE 日波动 σ≈5.2%，和默认阈值针对的 5% 相当，阈值不用单独设。字段说明见 memory.yaml 的开头。
+#
+# 2026-10-23 实测（近一年日线，以 LITE 为例）：
+#   板块基准   LITE 对 SOXX 的 R² 只有 0.40，对同业的等权篮子 0.71 → 用 basket
+#   同业       剔除大盘（SPY）后的残差相关（近 120 个交易日）：COHR 0.86、AAOI 0.80、VIAV 0.78、CIEN 0.69、GLW 0.69、FN 0.68
+#              （NVDA 0.29、AVGO 0.29：平时不怎么同涨同跌，但财报牵动板块，放进 catalysts）
+#   夜间信号   中国光模块股当天涨跌与 LITE 次日开盘跳空的偏相关（剔除 LITE 前一天涨跌）：中际旭创 0.39、新易盛 0.38、
+#              天孚通信 0.39；日本藤仓（5803.T）主要是跟随美股前一天，新信息少，没放进来
+# 这些数字会随行情阶段变化，持有之前最好重算一遍。
+
+name: 光模块
+focus: 数据中心光模块与光器件（800G / 1.6T、CPO、硅光）
+benchmark: basket                # 同业等权篮子（只用 peers 里的美股）
+
+peers:
+  COHR: Coherent
+  AAOI: Applied Optoelectronics
+  CIEN: Ciena
+  FN: Fabrinet
+  GLW: 康宁
+  VIAV: Viavi                    # tsen scope suggest LITE 发现的（0.78），原模板漏了
+
+# 夜间信号：上海 / 深圳时段（美东约 21:30–03:00）。三只常常同涨同跌，按篮子触发（overnight_basket 默认打开）：
+# 一波行情只推一条“光模块夜间信号（上海 / 深圳篮子）”，某一只相对篮子单独动 ≥3% 时才单独推。
+# A 股波动大（这三只日波动 σ 3.6–4.6%），篮子的阈值设得比海外股票默认宽一些。
+overnight:
+  "300308.SZ": 中际旭创
+  "300502.SZ": 新易盛
+  "300394.SZ": 天孚通信
+overnight_alert: {rapid_pct: {5: 2.5, 15: 4, 30: 5, 60: 5}, day_pct: [5, 8, 12]}
+
+catalysts:
+  NVDA: 英伟达
+  ANET: Arista
+  AVGO: 博通
+  MRVL: 迈威尔
+  CRDO: Credo
+  MSFT: 微软
+  GOOGL: 谷歌
+  AMZN: 亚马逊
+  META: Meta
+
+news:
+  en: ["optical transceiver", "800G optical module", "co-packaged optics"]
+  zh: ["光模块", "CPO 光模块"]
+
+indicators:
+  - {key: cny, name: 美元/人民币, symbol: "CNY=X", group: 光模块, kind: level, ref: 24h}
+  - {key: chinext, name: 创业板指, symbol: "399006.SZ", group: 光模块, kind: level, ref: close}

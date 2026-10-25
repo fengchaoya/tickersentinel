@@ -1,0 +1,44 @@
+# 密钥与本地数据
+.env
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+build/
+dist/
+
+# 系统
+.DS_Store
+
+# 密钥的副本（模板 .env.example 要提交）
+.env.*
+!.env.example
+
+# 本地数据库、日志（data/ 之外的也不提交）
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite3-journal
+*.log
+
+# 自己的私有配置（放 config.local/，用环境变量 TICKERSENTINEL_SETTINGS 指过去）
+config.local/
+
+# Claude Code 的本机文件（项目技能 .claude/skills/ 要提交）
+.claude/settings.local.json
+.claude/worktrees/
+.claude/scheduled_tasks.lock
+.claude/scheduled_tasks.json
+CLAUDE.local.md
+
+# 工具缓存、编辑器
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.idea/
+.vscode/

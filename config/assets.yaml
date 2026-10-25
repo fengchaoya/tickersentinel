@@ -1,0 +1,91 @@
+# 盯哪些资产、每个资产的警报灵敏度。
+# 增删持仓、调灵敏度都改这个文件；每个持仓用 theme 指向 config/themes/ 里的一个主题（板块联动：基准、同业、夜间信号、
+# 相关公司、检索词、板块指标都在主题里，同一板块的持仓共用）。正在运行的 `tsen run` 一分钟内自动读到，不用重启；`tsen scope` 查看当前的监控范围。
+# 调阈值前后可以用 `tsen assets` 看各资产最近的波动有多大、当前阈值相当于几倍波动，用 `tsen replay --days 10` 看会推送多少条。
+#
+# 警报规则（每个资产都可以单独设，不写就用下面 defaults 里它所属类别的默认值）：
+#   rapid_pct   急涨急跌：{窗口分钟: 下限%}。最近这么多分钟里的最高点到现价跌了这么多（或最低点到现价涨了这么多），
+#               同时 z 值超过 z（相对它自己近 5 天的波动足够反常）。数字越小越灵敏。
+#               例：{5: 1.5, 15: 2.5, 30: 3, 60: 3} = 5 分钟内从高点回落 1.5%、……、60 分钟内回落 3%（“先涨 2% 再跌到 -1%”会推）。
+#   z           z 值下限（默认 4）：越小越灵敏。
+#   day_pct     全天累计：从“昨收与今天最高点里更高的那个”算起跌了这么多（涨的方向对称）时推送，每一档推一次；
+#               创出新的高 / 低点后重新计。负责跳空、几个小时的一路下跌、慢速的冲高回落。旧名 levels_pct 也认。
+#   hours       只对美股：extended = 盘前 4:00 + 盘中 + 盘后到 20:00（美东）；regular = 只盯 9:30–16:00。
+# 默认值按日波动约 5% 的股票（如美股存储芯片股）定；波动不同的资产按比例换算——`tsen scope tune 代码` 会按它最近的日波动给建议，
+# 并回放最近 10 个交易日对比推送量（纯计算，不用大模型）。
+#
+# 资产类别 class：
+#   us_equity       美股 / 美股 ADR。参照价：盘前、盘中 = 昨收；盘后 = 当天收盘（盘后的“全天 8%”从今天收盘算起）。
+#   foreign_equity  海外股票（.KS 首尔、.T 东京……），按当地交易所的交易时段盯。
+#   future          期货（黄金 GC=F、白银 SI=F、原油 CL=F……），CME 几乎 24 小时交易（美东 18:00 到次日 17:00）。
+#                   参照价 = 上一个交易时段结束（美东 17:00）时的价格。
+#   crypto          加密货币（BTC-USD……），全天候，参照价 = UTC 0 点。
+#
+# 其他字段：
+#   theme           属于哪个主题（config/themes/<主题>.yaml）；属于多个时写成列表，第一个是主主题（决定板块基准）。
+#   holding: false  只盯盘、不算持仓（不进简报的持仓列表、不单独检索新闻）；related_to 写它对应哪些持仓，异动时按它们找新闻。
+#                   主题里的夜间信号（overnight）会自动成为只盯盘的资产，不用写在这里；这里写了的以这里为准（例如要单独调阈值）。
+#   monitor: false  不做异动检测（仍然出现在简报、新闻、对话里）。
+#   queries         新闻检索词（按语言）；underlying / adr_ratio / fx_symbol：ADR 的主上市股票、换算比例、汇率；
+#   note            补充背景，会写进所有提示词（模型不知道的新事实）。
+#
+# 关于“24 小时”：美股在美东 20:00–04:00 的夜盘（Blue Ocean 等）没有免费数据源，这段时间靠亚洲同一家公司 / 同业
+# （主题里的 overnight，存储芯片是首尔的 000660.KS）盯着；免费数据里期货与利率约延迟 10 分钟。
+
+defaults:
+  us_equity:
+    hours: extended
+    rapid_pct: {5: 1.5, 15: 2.5, 30: 3, 60: 3}
+    z: 4.0
+    day_pct: [5, 8, 12]
+  foreign_equity:
+    rapid_pct: {5: 1.5, 15: 2.5, 30: 3, 60: 3}
+    z: 4.0
+    day_pct: [5, 8, 12]
+  future:                        # 黄金一天 ±2% 已经是大行情，所以比个股灵敏得多
+    rapid_pct: {5: 0.6, 15: 1.0, 30: 1.4, 60: 1.4}
+    z: 4.0
+    day_pct: [1.5, 2.5, 4]
+  crypto:
+    rapid_pct: {5: 1.5, 15: 2.5, 30: 3, 60: 3}
+    z: 4.0
+    day_pct: [5, 8, 12]
+
+assets:
+  # 示例：一只光模块股。主题 optics 里写好了它的板块基准（同业等权篮子）、同业、夜间信号（中国光模块股，
+  # 美东约 21:30–03:00 的沪深时段）、相关公司（大客户、供应商）和检索词。换成你自己的持仓时，
+  # 用 `tsen scope add 代码` 自动找联动（确认后写入），或照着这个格式手写。
+  - symbol: LITE
+    name: Lumentum
+    class: us_equity
+    theme: optics                # config/themes/optics.yaml
+    queries:                     # 新闻检索词，按语言分组（对应 settings.yaml 里的 Google News 版本）
+      en: ["Lumentum", "Lumentum stock"]
+      zh: ["Lumentum 光模块"]
+
+  # ── 想盯存储芯片股时，去掉下面的 #（主题 config/themes/memory.yaml 写好了首尔 / 东京的夜间信号、相关公司）──
+  # - symbol: MU
+  #   name: 美光 Micron
+  #   class: us_equity
+  #   theme: memory
+  #   queries: {en: ["Micron Technology"], zh: ["美光科技"]}
+
+  # ── ADR（主上市在海外）的写法：underlying 主上市代码、adr_ratio 每份 ADR 折合几股、fx_symbol 汇率 ──
+  # - symbol: TSM
+  #   name: 台积电 ADR
+  #   class: us_equity
+  #   underlying: "2330.TW"
+  #   adr_ratio: 5               # 1 份 ADR = 5 股台湾普通股
+  #   fx_symbol: "TWD=X"
+
+  # ── 持有黄金 / 白银时，去掉下面的 # 即可（阈值是示例，可以先用 tsen assets 看看它们最近的波动再定） ──
+  # - symbol: "GC=F"
+  #   name: 黄金
+  #   class: future
+  #   queries: {en: ["gold price"], zh: ["黄金价格"]}
+  #   alert: {rapid_pct: {5: 0.4, 15: 0.6, 30: 0.7, 60: 0.7}, day_pct: [1.2, 2, 3]}
+  # - symbol: "SI=F"
+  #   name: 白银
+  #   class: future
+  #   queries: {en: ["silver price"], zh: ["白银价格"]}
+  #   alert: {rapid_pct: {5: 0.8, 15: 1.2, 30: 1.5, 60: 1.5}, day_pct: [2.5, 4, 6]}

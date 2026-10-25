@@ -1,0 +1,229 @@
+# tickersentinel 配置（非敏感参数；API 密钥放在 .env）
+# 这是示例配置（持仓示例为光模块股 LITE）。建议把 config/ 整个复制成 config.local/（不进 git），在 .env 里写
+# TICKERSENTINEL_SETTINGS=config.local/settings.yaml，以后只改那一份——持仓不会随 git 公开，拉取更新也不冲突。
+# 持仓与警报灵敏度在 assets.yaml，每个板块的联动（基准、同业、夜间信号、相关公司、检索词、板块指标）在 themes/；
+# 这里放与具体股票无关的设置（含基础宏观变量）。这份文件改完要重启 `tsen run`（assets.yaml、themes/ 不用）。字段写错会直接报错。
+
+timezone: America/New_York       # 推送和定时任务使用的本地时区（IANA 名称，如 America/New_York、Asia/Shanghai）
+log_level: INFO
+
+# ───────────────────────── 标的 ─────────────────────────
+universe:
+  # 持仓清单与警报灵敏度：config/assets.yaml；板块联动（基准、同业、夜间信号、相关公司、检索词、板块指标）：config/themes/
+  benchmark: SPY                 # 兜底：没写 theme 的资产用它拆分“板块 / 个股”
+  display_names:                 # 主题里没有的代码在推送里显示的名称
+    "KRW=X": 美元/韩元
+
+# ───────────────────────── 定时简报 ─────────────────────────
+briefs:
+  premarket:
+    enabled: true
+    time: "07:30"                # 本地时间
+    trading_days_only: true      # 美股休市日不发
+    lookback_hours: 18
+  close:
+    enabled: true
+    minutes_after_close: 15      # 收盘后多久发（提前收盘日自动顺延，不写死 15:15）
+    lookback_hours: 8
+  weekly:
+    enabled: true
+    day_of_week: sat
+    time: "09:00"
+    lookback_hours: 168
+    linkage_check: true          # 周报末尾附“联动体检”：同业 / 夜间信号的联动变弱、或出现新的强联动候选时才附（tsen scope check 随时查）
+  max_news_per_symbol: 8
+  events_days_ahead: 7          # 盘前 / 收盘简报里列出未来几天的事件
+
+# ───────────────────────── 异动监控（全天候） ─────────────────────────
+# 只在出现异动时推送；没有异动就没有消息。
+monitor:
+  enabled: true
+  interval_seconds: 60           # 检测频率
+  merge_minutes: 10              # 同一主题（如存储芯片）几只同方向一起异动：合成一条推送；之后 10 分钟内跟着动的挂在第一条下面
+                                 # 作回复（个股因素为主的照样单独归因）。0 = 每只单独推
+  price:
+    # 规则 A「急涨急跌」（相对最近 5/15/30/60 分钟内的高 / 低点）与 B「全天累计」的阈值按资产设置，在 config/assets.yaml（这里不再写）。
+    # 规则 C「个股特异」：剔除板块（β × 这只股票所属主题的基准）后的异常收益显著。默认关闭，需要时打开
+    idiosyncratic:
+      enabled: false
+      z_threshold: 4.5
+      min_move_pct: 2.0
+    cooldown_minutes: 15         # 同标的同方向的冷却期（实际取 max(冷却期, 窗口长度)）
+    escalation_factor: 2.0       # 冷却期内幅度扩大到 2 倍以上，仍推送“扩大”提醒（1.5 倍时一波大行情会连推三四条）
+    open_warmup_minutes: 10      # 每段开头（开盘、午休后复盘）10 分钟内不跑 A/C 规则（跳空交给全天累计）；盘后段例外
+    sigma_lookback_sessions: 5   # 用前 5 个交易日的分钟数据估计波动率与成交量画像
+    beta_lookback_days: 60       # 用前 60 个交易日的日收益估计 β
+    min_sigma_obs: 150           # 估计波动率所需的最少 5 分钟收益样本数
+  options:
+    enabled: false               # 第 4 阶段：期权异动（快照差分）
+    poll_seconds: 120
+    min_premium_usd: 500000
+    min_volume_oi_ratio: 1.0
+
+# ───────────────────────── 事件日历 ─────────────────────────
+# 提前收集财报日、内部人拟减持、锁定期到期等事件，每晚汇总推送一次，并写进简报。
+events:
+  enabled: true
+  # 相关公司（同业、催化剂公司）写在各主题里（config/themes/ 的 peers / catalysts），持仓和它们的财报都会自动收集。
+  # 这里只放和具体主题无关、但也想收集财报的公司（代码 → 显示名称），一般留空。
+  related: {}
+  # 宏观日程（官方日程，不需要 key）：进每晚汇总的“宏观”部分、简报、对话，异动归因时也会对照异动前后的日程。
+  # 不想要的项删掉或写成 [] / false。
+  macro:
+    enabled: true
+    fed: [fomc, minutes, chair]  # 美联储：议息决议 + 记者会（标注点阵图）、会议纪要、主席讲话与国会证词；可加 beige_book（褐皮书）
+    us_data: [cpi, ppi, jobs, jolts, pce, gdp, retail_sales]
+                                 # 美国数据：CPI、PPI、非农、JOLTS（BLS，需要 .env 的 BLS_USER_AGENT）、PCE 物价、GDP（BEA）、
+                                 # 零售销售（人口普查局）；可加 eci（就业成本指数）、durable_goods（耐用品订单）
+    treasury_auctions: [10Y, 20Y, 30Y]   # 长端国债拍卖（财政部约提前一周公告；结果 13:00 美东公布，常牵动长端利率）
+    boj: true                    # 日本央行议息（日元急升常伴随全球去杠杆）
+    korea_exports: true          # 韩国月度进出口（每月 1 日）与前 20 天出口（21 日），按惯例推算
+    opex: true                   # 美股月度期权到期（季月为“四巫日”）
+    us_market: true              # 美股休市与提前收盘
+  collect_times: ["06:40", "18:30"]   # 本地时间，每天刷新两次（盘前简报之前、晚间汇总之前）
+  lookahead_days: 100            # 收集未来多少天的事件：季度财报间隔约 91 天，100 天保证每家的下一次财报都在库里（对话能答“下次财报哪天”）；
+                                 # 每晚汇总只报 45 天以内估计日期的变化，远期估计改来改去不打扰
+  sources:
+    yfinance: true               # 财报日，覆盖全部代码（多为估计日期）
+    jpx: true                    # 东京交易所官方财报日程（东京上市的公司，已确认）
+    sec_6k: true                 # 外国发行人（ADR）用 6-K 公布的业绩发布时间（已确认）
+    sec_144: true                # 持仓的内部人拟减持通知 Form 144（美国发行人；外国发行人不提交 144）
+  insider_sale_min_usd: 1000000  # 拟减持金额低于 100 万美元的不收录
+  digest:
+    enabled: true
+    time: "20:00"                # 每晚汇总：明天的事件 + 新增 / 改期；都没有就不推送
+    days_ahead: 14
+  manual: []                     # 手工录入的日程，例如：
+  # - {symbol: LITE, day: 2027-01-05, kind: lockup_expiry, title: "某次增发的锁定期到期"}
+
+# ───────────────────────── 宏观变量 ─────────────────────────
+# 附在每条异动推送末尾（in_alert: true 的），也交给归因模型参考；飞书里发 /macro（或“宏观”）、终端里 tsen macro 随时查看全部。
+# 数据：yfinance 1 分钟线（利率与期货约延迟 10–15 分钟）+ 美国财政部官方收益率曲线（前一交易日收盘，补 2 年期与 2s10s 利差）。
+# 涨跌口径 ref：close = 较上一个美股交易日收盘；24h = 较 24 小时前（几乎全天交易的期货、外汇、比特币用这个）。
+# kind：yield = 数值是收益率（%），变化用 bp；price = 带 $；level = 指数点位。
+# off_hours_symbol：美股休市时改看这个（股指 → 期货），口径为“较美股收盘”，即收盘以来期货走了多少。
+macro:
+  enabled: true
+  attach_to_alerts: true
+  timeout_seconds: 10            # 推送异动时最多等宏观数据多久；取不到就不附，不耽误推送
+  treasury_curve: true
+  indicators:
+    - {key: us10y,  name: 美债10年,  symbol: "^TNX",     group: 利率,     kind: yield, ref: close}
+    - {key: us30y,  name: 美债30年,  symbol: "^TYX",     group: 利率,     kind: yield, ref: close}
+    - {key: wti,    name: WTI原油,   symbol: "CL=F",     group: 大宗商品, kind: price, ref: 24h}   # 美国基准；想看布伦特改成 BZ=F
+    - {key: gold,   name: 黄金,      symbol: "GC=F",     group: 大宗商品, kind: price, ref: 24h}
+    - {key: silver, name: 白银,      symbol: "SI=F",     group: 大宗商品, kind: price, ref: 24h}
+    - {key: spx,    name: 标普500,   symbol: "^GSPC",    group: 股指,     kind: level, ref: close, off_hours_symbol: "ES=F", off_hours_name: 标普期货}
+    - {key: ixic,   name: 纳斯达克,  symbol: "^IXIC",    group: 股指,     kind: level, ref: close, off_hours_symbol: "NQ=F", off_hours_name: 纳指100期货}
+    - {key: vix,    name: VIX,       symbol: "^VIX",     group: 股指,     kind: level, ref: close}  # 风险偏好
+    - {key: dxy,    name: 美元指数,  symbol: "DX-Y.NYB", group: 其他,     kind: level, ref: 24h}    # 全球美元流动性
+    - {key: usdjpy, name: 美元/日元, symbol: "JPY=X",    group: 其他,     kind: level, ref: 24h}    # 套息交易：日元急升常伴随全球去杠杆
+    - {key: btc,    name: 比特币,    symbol: "BTC-USD",  group: 其他,     kind: price, ref: 24h, in_alert: false}  # 投机流动性，/macro 里看
+    # 其他可选：铜 HG=F（经济周期）、5 年期利率 ^FVX、3 个月国库券 ^IRX、布伦特 BZ=F、费城半导体指数 ^SOX
+
+# ───────────────────────── 异动归因 ─────────────────────────
+attribution:
+  enabled: true
+  news_minutes_before: 90        # 检索异动前多久的新闻
+  news_minutes_after: 15
+  overnight_hours_for_gaps: 18   # 从昨收算起的全天累计（如开盘跳空）回看隔夜新闻
+  use_web_search: true           # 让模型额外联网检索（Claude web search，按次计费）
+  max_web_searches: 4
+  max_candidates: 25
+
+# ───────────────────────── 数据源 ─────────────────────────
+sources:
+  http_timeout_seconds: 12
+  prices:
+    provider: yfinance           # 实时分钟线的主源。yfinance：盘前盘后 04:00–20:00 完整（推荐）| alpaca：免费 IEX，只有美东约 08:00–17:00、个股缺 5–20% 的分钟
+    fallback: alpaca             # 主源报错或缺代码时用它补：none | alpaca | yfinance（需要对应的 key，没有就不启用）
+    official_closes: true        # 日线收盘价优先用 Alpaca SIP（与官方收盘一致；免费账户只给 15 分钟以前的数据，日线够用）
+    alpaca_feed: iex             # Alpaca 实时分钟线：免费账户只能 iex（sip 只给 15 分钟以前的，兜底的历史请求会自动用 sip）
+  news:
+    finnhub:
+      enabled: true              # 需要 FINNHUB_API_KEY
+    google_news_rss:
+      enabled: true
+      editions:
+        en: {hl: en-US, gl: US, ceid: "US:en"}
+        ko: {hl: ko, gl: KR, ceid: "KR:ko"}
+        zh: {hl: zh-CN, gl: CN, ceid: "CN:zh-Hans"}
+  filings:
+    sec_edgar:
+      enabled: true
+      # SEC 要求在 User-Agent 里写联系方式：请在 .env 里设置 SEC_EDGAR_USER_AGENT（优先于这里的占位值）
+      user_agent: "tickersentinel your-email@example.com"
+      # 各类型的 /A 修订自动包含；SC 13D/G 同时匹配 2024 年底改名后的 SCHEDULE 13D/G
+      forms: ["8-K", "6-K", "4", "10-Q", "10-K", "SC 13D", "SC 13G", "424B5"]
+    dart:
+      enabled: false             # TODO：韩国 DART 公告，需要 OPENDART_API_KEY
+
+# ───────────────────────── 大模型 ─────────────────────────
+# 默认全部用本机 LM Studio 里的模型（不花钱、数据不出本机）。云端档案留好了，改 tasks 就能切换。
+llm:
+  providers:
+    local:                       # 本机 LM Studio（OpenAI 兼容接口）
+      kind: openai_compat
+      base_url: http://127.0.0.1:1234/v1
+      model: qwen/qwen3.8-27b    # 也可以换成 qwen/qwen3.6-27b（Q6 量化，约 23 GB，更慢一些）
+      reasoning_effort: none     # 关闭思考：新闻整理不需要长推理，速度快数倍
+      max_tokens: 2000
+      timeout_seconds: 300
+      lmstudio:                  # 调用前自动 lms server start / lms load（Mac 重启后也能自己拉起来）
+        auto_start: true
+        context_length: 32768
+        ttl_minutes: 60          # 闲置 60 分钟后自动卸载模型，释放内存
+    anthropic:                   # Claude：需要 .env 里的 ANTHROPIC_API_KEY；可以联网检索
+      kind: anthropic
+      model: claude-sonnet-5-5
+      api_key_env: ANTHROPIC_API_KEY
+      effort: low                # 思考深度：low / medium / high
+      web_search_tool: web_search_20260209
+    claude_research:             # （备用，默认没用到）给新持仓提名联动候选：要靠模型自己的知识 + 联网核实代码，本地 27B 模型不够用。
+      kind: anthropic            # 一年用不了几次，用最强的 Opus；每次大约 0.2–0.5 美元（思考 + 最多 8 次联网检索及检索结果的 token）
+      model: claude-opus-5-5
+      api_key_env: ANTHROPIC_API_KEY
+      effort: high               # Opus 5.5 默认 medium；这类判断任务用 high
+      web_search_tool: web_search_20260209
+    openai:                      # OpenAI 或任何 OpenAI 兼容的云服务：填 .env 里的 OPENAI_API_KEY，并把 model 改成要用的模型
+      kind: openai_compat
+      base_url: https://api.openai.com/v1
+      model: gpt-5-mini
+      api_key_env: OPENAI_API_KEY
+      max_tokens_param: max_completion_tokens   # OpenAI 推理模型只认这个参数名
+      max_tokens: 8000           # 推理模型的思考也算在上限里，给足余量
+  tasks:                         # 每项任务依次尝试的供应商；前一个失败就换下一个，全失败则降级
+    brief: [local]               # 简报
+    attribution: [local]         # 盘中异动归因（想要联网检索就改成 [anthropic] 或 [local, anthropic]）
+    events: [local]              # 事件日历的文字汇总
+    chat: [local]                # 在飞书里给机器人发消息时的回答
+    scope: []                    # 给新持仓提名联动候选：默认不调用 API——在 Claude Code 里用订阅额度准备（项目技能 add-holding，
+                                 # 写到 data/scope_candidates/<代码>.json，tsen scope add 自动读取）。想让程序自己调用就写 [claude_research]
+  brief_max_chars: 900           # 简报正文目标长度（手机阅读）
+  brief_max_items: 40            # 交给模型的新闻条数上限（本地模型约 17 token/秒，条目越多越慢）
+  # 读者画像：会放进提示词，影响简报和归因的写法（持仓列表由 config/assets.yaml 自动生成）
+  reader_profile: "读者熟悉计量与金融（事件研究、异常收益、β 这类说法可以直接用），偏好简洁、信息密度高、区分事实与推断的表达。"
+
+# ───────────────────────── 对话 ─────────────────────────
+# 在飞书里给机器人发消息（只在 tsen run 常驻运行时生效）。模型可以调用工具查询最新行情、盘中走势与板块/个股拆分、
+# 新闻与公告、历史异动与归因、事件日历（见 agents/chat_tools.py）。发 /new 开始新对话（清空记忆）。
+chat:
+  enabled: true
+  history_turns: 5               # 带上最近 5 轮对话
+  ack: "收到，思考中…"            # 先回这一句（本地模型带工具回答要 20–50 秒）；留空则不回
+  max_chars: 600                 # 回答的目标长度
+  max_tool_rounds: 4             # 一次提问最多几轮工具调用
+
+# ───────────────────────── 推送 ─────────────────────────
+notify:
+  provider: console             # ← 推送渠道开关：console（只打印到终端）| feishu（推荐，见 README「推送：飞书」）| telegram（未实现）
+  console_log_path: data/outbox.log
+  # 飞书日历 / 多维表格同步（只需要 FEISHU_APP_ID / SECRET）。先在开发者后台开通 calendar:calendar、bitable:app
+  # 并发布新版本，运行 tsen feishu calendar-setup / bitable-setup，确认没问题再改成 true（见 README「飞书日历与多维表格」）
+  feishu_sync:
+    calendar: false             # 事件日历（财报、Form 144 拟减持、解禁……）→ 飞书日历「tickersentinel · 事件日历」
+    bitable: false              # 每条异动 + 归因 → 多维表格的一行；你填的「label 真实原因」「notes 备注」会拉回 alerts 表
+    invite_user: false          # true：同时把你加为每个日程的参与人（不发通知），不订阅日历也能在主日历里看到
+
+storage:
+  sqlite_path: data/tickersentinel.sqlite3

@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=77"]  # license 用 SPDX 写法（PEP 639）
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tickersentinel"
+version = "0.1.0"
+description = "tickersentinel：按持仓定制的盯盘与投研小助理——定时简报、全天候异动监控与归因、事件日历、手机推送；默认用本机大模型"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "fengchaoya" }]
+keywords = ["stock-monitoring", "event-study", "llm", "feishu", "market-data"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Natural Language :: Chinese (Simplified)",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.6",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "httpx>=0.27",
+    "feedparser>=6.0",
+    "pandas>=2.1",
+    "numpy>=1.26",
+    "yfinance>=0.2.50",
+    "apscheduler>=3.10,<4",
+    "exchange-calendars>=4.5",
+    "anthropic>=1.13",  # 用到 beta.messages 的 fallbacks / output_config
+    "ruamel.yaml>=0.18",  # tsen scope / 飞书 /scope 改 assets.yaml 时保留注释和格式
+]
+
+[project.optional-dependencies]
+# 推送渠道：飞书 pip install -e ".[feishu]"（推送、对话、日历 / 多维表格同步都要）；telegram 尚未实现
+telegram = ["python-telegram-bot>=21"]
+feishu = ["lark-oapi>=1.7"]  # 用到 1.7 起的 lark_oapi.channel.FeishuChannel
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+tickersentinel = "tickersentinel.cli:main"
+tsen = "tickersentinel.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = ["ignore::DeprecationWarning"]

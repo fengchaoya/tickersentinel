@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- EDGAR 0001950047-26-009626（SNDK Form 144，2026-09-17），删减了地址、取得明细与近 3 个月出售明细 --><edgarSubmission xmlns="http://www.sec.gov/edgar/ownership" xmlns:ns2="http://www.sec.gov/edgar/common">
+    <headerData>
+        <submissionType>144</submissionType>
+    </headerData>
+    <formData>
+        <issuerInfo>
+            <issuerCik>0002023554</issuerCik>
+            <issuerName>Sandisk Corporation</issuerName>
+            <nameOfPersonForWhoseAccountTheSecuritiesAreToBeSold>DAVID GOECKELER</nameOfPersonForWhoseAccountTheSecuritiesAreToBeSold>
+            <relationshipsToIssuer>
+                <relationshipToIssuer>Director</relationshipToIssuer>
+                <relationshipToIssuer>Officer</relationshipToIssuer>
+            </relationshipsToIssuer>
+        </issuerInfo>
+        <securitiesInformation>
+            <securitiesClassTitle>Common</securitiesClassTitle>
+            <brokerOrMarketmakerDetails>
+                <name>Morgan Stanley Smith Barney LLC Executive Financial Services</name>
+            </brokerOrMarketmakerDetails>
+            <noOfUnitsSold>33841</noOfUnitsSold>
+            <aggregateMarketValue>51437304.77</aggregateMarketValue>
+            <noOfUnitsOutstanding>146419001</noOfUnitsOutstanding>
+            <approxSaleDate>09/17/2026</approxSaleDate>
+            <securitiesExchangeName>NASDAQ</securitiesExchangeName>
+        </securitiesInformation>
+        <remarks>The securities to be sold were acquired upon the vesting of restricted stock units during the period of 05/20/2026 through 09/03/2026
+</remarks>
+        <noticeSignature>
+            <noticeDate>09/17/2026</noticeDate>
+            <planAdoptionDates>
+                <planAdoptionDate>05/29/2026</planAdoptionDate>
+            </planAdoptionDates>
+        </noticeSignature>
+    </formData>
+</edgarSubmission>
