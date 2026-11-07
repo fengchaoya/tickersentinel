@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- EDGAR 0001965301-26-000160（MU Form 144，2026-10-15 提交、拟 10-16 出售），删减同上 --><edgarSubmission xmlns="http://www.sec.gov/edgar/ownership" xmlns:com="http://www.sec.gov/edgar/common">
+  <headerData>
+    <submissionType>144</submissionType>
+  </headerData>
+  <formData>
+    <issuerInfo>
+      <issuerCik>0000723125</issuerCik>
+      <issuerName>MICRON TECHNOLOGY INC</issuerName>
+      <nameOfPersonForWhoseAccountTheSecuritiesAreToBeSold>Deboer Scott J</nameOfPersonForWhoseAccountTheSecuritiesAreToBeSold>
+      <relationshipsToIssuer>
+        <relationshipToIssuer>Officer</relationshipToIssuer>
+      </relationshipsToIssuer>
+    </issuerInfo>
+    <securitiesInformation>
+      <securitiesClassTitle>Common</securitiesClassTitle>
+      <brokerOrMarketmakerDetails>
+        <name>Commonwealth Financial Network</name>
+      </brokerOrMarketmakerDetails>
+      <noOfUnitsSold>28545</noOfUnitsSold>
+      <aggregateMarketValue>26050061.00</aggregateMarketValue>
+      <noOfUnitsOutstanding>1128000000</noOfUnitsOutstanding>
+      <approxSaleDate>10/16/2026</approxSaleDate>
+      <securitiesExchangeName>NASDAQ</securitiesExchangeName>
+    </securitiesInformation>
+    <noticeSignature>
+      <noticeDate>10/15/2026</noticeDate>
+      <planAdoptionDates>
+        <planAdoptionDate>07/17/2026</planAdoptionDate>
+      </planAdoptionDates>
+    </noticeSignature>
+  </formData>
+</edgarSubmission>

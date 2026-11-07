@@ -1,0 +1,33 @@
+{# 今明日程（overview_panels.event_rows） #}
+{%- macro rows(items) -%}
+<ul class="ev-list">
+  {%- for r in items %}
+  {%- set e = r.event %}
+  <li class="ev-row">
+    <span class="ev-time num">{{ r.time_text }}{% if r.tz_text %}<small> {{ r.tz_text }}</small>{% endif %}</span>
+    <span class="ev-main">
+      <span class="badge badge-{{ r.badge_cls }}">{{ r.badge }}</span>
+      {%- set link = safe_url(e.url) %}
+      {%- if link %}<a class="ev-title" href="{{ link }}" target="_blank" rel="noopener noreferrer">{{ e.title }}</a>
+      {%- else %}<span class="ev-title">{{ e.title }}</span>{% endif %}
+      {%- if r.holding %} <span class="badge badge-accent">持仓</span>{% endif %}
+      {%- if not e.confirmed %} <span class="badge badge-outline" title="日期是数据源的估计，可能变动">预计</span>{% endif %}
+    </span>
+  </li>
+  {%- endfor %}
+</ul>
+{%- endmacro -%}
+{%- if ev.error %}
+<div class="empty">事件日历暂时读不到<br><span class="small">{{ ev.error }}</span></div>
+{%- elif not ev.today and not ev.tomorrow %}
+<div class="empty">今天和明天没有日程</div>
+{%- else %}
+<div class="ev-day">
+  <div class="ev-dname">今天 <span class="muted">{{ ev.today_date.strftime('%m-%d') }} 周{{ '一二三四五六日'[ev.today_date.weekday()] }}</span></div>
+  {%- if ev.today %}{{ rows(ev.today) }}{% else %}<div class="ev-none muted small">没有日程</div>{% endif %}
+</div>
+<div class="ev-day">
+  <div class="ev-dname">明天 <span class="muted">{{ ev.tomorrow_date.strftime('%m-%d') }} 周{{ '一二三四五六日'[ev.tomorrow_date.weekday()] }}</span></div>
+  {%- if ev.tomorrow %}{{ rows(ev.tomorrow) }}{% else %}<div class="ev-none muted small">没有日程</div>{% endif %}
+</div>
+{%- endif %}

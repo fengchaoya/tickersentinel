@@ -1,0 +1,203 @@
+/* 总览页：对话 / 消息流、宏观看板、今明日程、今日异动。颜色只用 app.css 的变量（浅色 / 深色、红涨 / 绿涨自动切换）。 */
+
+.ov-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(470px, 0.85fr); gap: 16px; align-items: start; margin-top: 16px; }
+.ov-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+@media (max-width: 1120px) {
+  /* 窄屏一列：宏观、日程、今日异动放在消息流前面（一眼能看到的先看），两张并排 */
+  .ov-grid { grid-template-columns: minmax(0, 1fr); }
+  .ov-side { order: -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  .ov-side > .card:first-child { grid-row: span 2; }
+}
+@media (max-width: 640px) {
+  .ov-side { grid-template-columns: minmax(0, 1fr); }
+  .ov-side > .card:first-child { grid-row: auto; }
+}
+
+/* ── 实时指示 ── */
+.ov-live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.ov-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-strong); }
+.ov-live.on { color: var(--green); }
+.ov-live.on .ov-live-dot { background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
+.ov-live.off .ov-live-dot { background: var(--muted); }
+
+/* ── 消息流 ── */
+.feed { display: flex; flex-direction: column; }
+.fc { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border);
+  position: relative; }
+.fc:last-of-type { border-bottom: none; }
+.fc-icon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; font-size: 13px; font-weight: 700;
+  background: var(--panel-2); color: var(--muted); }
+.fc-alert.fc-up .fc-icon { background: var(--up-soft); color: var(--up); }
+.fc-alert.fc-down .fc-icon { background: var(--down-soft); color: var(--down); }
+.fc-attribution .fc-icon { background: var(--purple-soft); color: var(--purple); }
+.fc-brief .fc-icon { background: var(--accent-soft); color: var(--accent); }
+.fc-events .fc-icon { background: var(--teal-soft); color: var(--teal); }
+.fc-macro .fc-icon { background: var(--amber-soft); color: var(--amber); }
+.fc-error .fc-icon { background: var(--red-soft); color: var(--red); }
+.fc-alert.fc-up::before, .fc-alert.fc-down::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px;
+  border-radius: 0 3px 3px 0; background: var(--up); }
+.fc-alert.fc-down::before { background: var(--down); }
+.fc-failed { background: color-mix(in srgb, var(--red-soft) 40%, transparent); }
+.fc-main { min-width: 0; }
+.fc-h { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.fc-kind { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+.fc-meta { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.fc-time { font-variant-numeric: tabular-nums; }
+.fc-title { font-weight: 600; color: var(--text); font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
+.fc-alert.fc-up > .fc-main > .fc-title { color: var(--up); }
+.fc-alert.fc-down > .fc-main > .fc-title { color: var(--down); }
+.fc-body { margin-top: 4px; }
+.fc-links { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; font-size: 12.5px; }
+.fc-link { white-space: nowrap; }
+
+details > summary { cursor: pointer; list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+
+/* 折叠的简报 / 事件汇总 */
+.fc-fold > summary { display: flex; flex-direction: column; gap: 2px; padding-right: 18px; position: relative; }
+.fc-fold > summary::after, .fc-reply > summary::after, .fc-snap > summary::after {
+  content: "›"; position: absolute; right: 2px; top: 0; color: var(--muted); transition: transform .15s; font-size: 15px; line-height: 1.3; }
+.fc-fold[open] > summary::after, .fc-reply[open] > summary::after, .fc-snap[open] > summary::after { transform: rotate(90deg); }
+.fc-preview { font-size: 12.5px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.fc-fold[open] .fc-preview { display: none; }
+.fc-fold[open] .fc-body { margin-top: 8px; }
+
+/* 宏观快照（异动推送末尾那段） */
+.fc-snap { margin-top: 4px; }
+.fc-snap > summary { font-size: 12px; color: var(--muted); position: relative; display: inline-block; padding-right: 16px; }
+.fc-snap > summary:hover { color: var(--text-2); }
+.fc-snap[open] .prose { margin-top: 4px; font-size: 12.5px; }
+
+/* 回复（归因、跟帖） */
+.fc-thread { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.fc-thread:empty { display: none; }
+.fc-reply { border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--panel-2); }
+.fc-reply > summary { display: flex; align-items: center; gap: 8px; padding: 7px 28px 7px 10px; position: relative; font-size: 13px; }
+.fc-reply > summary::after { top: 6px; right: 10px; }
+.fc-rtag { flex: none; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: var(--purple-soft); color: var(--purple); }
+.fc-reply-alert .fc-rtag { background: var(--panel-3); color: var(--text-2); }
+.fc-reply-alert .fc-rtag.up { color: var(--up); background: var(--up-soft); }
+.fc-reply-alert .fc-rtag.down { color: var(--down); background: var(--down-soft); }
+.fc-rsum { flex: 1; min-width: 0; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fc-reply[open] .fc-rsum { white-space: normal; }
+.fc-rmeta { flex: none; font-size: 12px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+.fc-rmeta .fc-ago { display: none; }
+.fc-rbody { padding: 2px 12px 10px; border-top: 1px solid var(--border); }
+.fc-rbody .prose { margin-top: 8px; }
+.fc-rtitle { font-weight: 600; margin-top: 8px; font-size: 13px; }
+.fc-reply[open] > summary .fc-rsum { display: none; }
+.fc-reply[open] > summary::before { content: ""; flex: 1; }
+
+/* 新到的消息：短暂高亮 */
+.fc-new { animation: fc-flash 2.4s ease-out; }
+@keyframes fc-flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
+
+.feed-more, .feed-end { text-align: center; padding: 12px; border-top: 1px solid var(--border); }
+.feed-empty { padding: 48px 16px; line-height: 1.8; }
+
+/* ── 宏观看板 ── */
+.ov-macro { padding-top: 8px; }
+.mq-skel { display: flex; flex-direction: column; gap: 8px; padding: 4px 0; }
+.mq-group { margin-bottom: 10px; }
+.mq-gname { font-size: 11.5px; color: var(--muted); font-weight: 500; margin: 4px 0 2px; letter-spacing: 0.2px; }
+/* 所有分组同一套固定列宽（_macro.html 的 colgroup）：名称 | 走势线 | 数值 | 口径 | 涨跌 | 1h，上下对齐 */
+table.mq { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+table.mq col.c-name { width: 98px; }
+table.mq col.c-spark { width: 76px; }
+table.mq col.c-lbl { width: 72px; }
+table.mq col.c-chg { width: 64px; }
+table.mq col.c-1h { width: 68px; }
+table.mq td { padding: 3px 0; border-bottom: 1px dashed var(--border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+table.mq tr:last-child td { border-bottom: 0; }
+.mq-name { color: var(--text-2); }
+td.mq-val { text-align: right; font-weight: 600; color: var(--text); }
+td.mq-lbl { text-align: right; font-size: 10.5px; color: var(--muted); padding-right: 4px !important; }
+td.mq-chg { text-align: right; font-weight: 500; }
+td.mq-1h { text-align: right; font-size: 11.5px; opacity: 0.75; }
+.mq-curve { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
+.mq-theme { padding-top: 6px; border-top: 1px solid var(--border); }
+.mq-foot { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 4px; }
+.mq-retry { margin-top: 10px; }
+/* 整行点进 /macro：名称上的链接铺满整行；小走势线跟着涨跌配色（currentColor = .up / .down） */
+table.mq tr.mq-row { position: relative; }
+table.mq tr.mq-row:hover td { background: var(--panel-2); }
+.mq-link { color: inherit; }
+.mq-link:hover { text-decoration: none; }
+.mq-link::after { content: ""; position: absolute; inset: 0; }
+td.mq-spark { padding: 0 6px !important; line-height: 0; vertical-align: middle; }
+/* 走势线用中性色：线是最近 24 小时，旁边的涨跌是较昨收 / 较美股收盘，两者方向可能相反，同色会误导 */
+td.mq-spark svg { display: block; color: var(--muted); }
+
+/* ── 今明日程 ── */
+.ov-events { padding-top: 8px; }
+.ev-day + .ev-day { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.ev-dname { font-size: 12.5px; font-weight: 600; margin-bottom: 4px; }
+.ev-list { list-style: none; margin: 0; padding: 0; }
+.ev-row { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 8px; padding: 4px 0; font-size: 13px; align-items: baseline; }
+.ev-time { color: var(--text-2); white-space: nowrap; }
+.ev-time small { color: var(--muted); font-size: 10.5px; }
+.ev-main { min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; }
+.ev-title { color: var(--text); overflow-wrap: anywhere; }
+a.ev-title:hover { color: var(--accent); }
+.ev-none { padding: 2px 0 4px; }
+
+/* ── 今日异动 ── */
+.ta-list { list-style: none; margin: 0; padding: 0; }
+.ta-list li + li { border-top: 1px solid var(--border); }
+.ta-row { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto auto 42px; gap: 8px; align-items: center; padding: 9px 16px;
+  color: var(--text); font-size: 13px; }
+.ta-row:hover { background: var(--panel-2); text-decoration: none; }
+.ta-dir { font-size: 11px; }
+.ta-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.ta-count { font-size: 11.5px; color: var(--muted); background: var(--panel-2); border-radius: 999px; padding: 1px 7px; }
+.ta-move { font-weight: 600; text-align: right; min-width: 64px; }
+.ta-time { text-align: right; font-size: 12px; }
+.ta-foot { padding: 8px 16px; border-top: 1px solid var(--border); }
+
+/* ── 左边的大面板：对话 | 消息流两个选项卡，占满一屏高度，各自在框里滚动（不随消息累积把整页往下拉）── */
+.ov-main { display: flex; flex-direction: column; height: calc(100vh - 140px); min-height: 520px; overflow: hidden; }
+.ov-tabs { display: flex; align-items: center; gap: 4px; padding: 8px 12px 0; border-bottom: 1px solid var(--border); flex: none; }
+.ov-tab { position: relative; padding: 8px 14px 10px; font: inherit; font-size: 14px; font-weight: 600; color: var(--muted);
+  background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; }
+.ov-tab:hover { color: var(--text); }
+.ov-tab.on { color: var(--text); border-bottom-color: var(--accent); }
+.ov-tabs .actions { margin-left: auto; }
+.ov-unread { display: inline-block; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; border-radius: 9px;
+  font-size: 11px; line-height: 18px; text-align: center; font-weight: 600; color: var(--text-2); background: var(--panel-2); }
+.ov-unread.alert { color: #fff; background: var(--accent); }
+.ov-unread[hidden] { display: none; }
+.ov-pane { flex: 1; min-height: 0; }
+.ov-pane[hidden] { display: none; }
+#tab-feed { overflow-y: auto; overscroll-behavior: contain; }
+/* 消息卡片上的“问一下” */
+.fc-ask { margin-left: 4px; padding: 1px 8px; font: inherit; font-size: 11.5px; color: var(--accent); background: none;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 10px; cursor: pointer; }
+.fc-ask:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+
+/* ── 对话选项卡（网页提问）── */
+.ov-chat { display: flex; flex-direction: column; padding: 12px 16px; }
+.chat-log { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; overscroll-behavior: contain; }
+.chat-log:not(:empty) { margin-bottom: 10px; }
+.chat-msg { max-width: 88%; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13.5px; line-height: 1.6;
+  overflow-wrap: anywhere; }
+.chat-user { align-self: flex-end; background: color-mix(in srgb, var(--accent) 12%, var(--panel)); white-space: pre-wrap; }
+.chat-assistant { align-self: flex-start; background: var(--panel-2); }
+.chat-assistant p { margin: 0 0 6px; }
+.chat-assistant p:last-child, .chat-assistant ul:last-child { margin-bottom: 0; }
+.chat-assistant ul { margin: 0 0 6px; padding-left: 18px; }
+.chat-wait { color: var(--muted); font-style: italic; }
+.chat-err { color: var(--text); background: color-mix(in srgb, var(--amber) 10%, var(--panel)); }
+.chat-note { padding: 4px 0; }
+.chat-form { display: flex; gap: 8px; align-items: flex-end; }
+.chat-form textarea { flex: 1; min-height: 36px; max-height: 160px; resize: none; padding: 8px 10px; font: inherit; font-size: 13.5px;
+  line-height: 1.5; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.chat-form textarea:focus { outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent); outline-offset: 0; border-color: var(--accent); }
+.chat-form .btn { height: 36px; }
+/* 带着哪条推送提问（“问一下”）；问题气泡里的引用行 */
+.chat-ctx { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; padding: 5px 10px; font-size: 12.5px;
+  background: var(--panel-2); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); }
+.chat-ctx[hidden] { display: none; }
+.chat-ctx-l { color: var(--muted); flex: none; }
+.chat-ctx-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-ctx-x { flex: none; border: 0; background: none; color: var(--muted); font-size: 16px; line-height: 1; cursor: pointer; }
+.chat-quote { font-size: 12px; color: var(--muted); margin-bottom: 4px; }

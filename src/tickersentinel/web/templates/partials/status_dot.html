@@ -1,0 +1,23 @@
+{# 顶栏右侧的运行状态：tsen run 在不在跑、上次检测；悬停看详情（启动时间、检测、分钟线采集）。每 30 秒刷新一次（base.html）。
+   总览页原来的“运行状态”方块已去掉，这里是唯一的运行状态显示：检测或采集出错时变色 #}
+{%- set hb = rt.heartbeat or {} -%}
+{%- set bars = hb.bars or {} -%}
+{%- set detail -%}
+{%- if hb.started_at %}启动 {{ hb.started_at|local('%m-%d %H:%M') }}{% endif -%}
+{%- if hb.last_tick_at %}；上次检测 {{ hb.last_tick_at|local('%H:%M:%S') }}{% if hb.tick_failures %}（连续失败 {{ hb.tick_failures }} 次）{% endif %}{% endif -%}
+{%- if bars %}；分钟线采集{% if bars.last_ok %} 上次成功 {{ bars.last_ok|local('%H:%M') }}{% endif %}{% if bars.failures %}，连续失败 {{ bars.failures }} 轮：{{ bars.last_error or '' }}{% endif %}{% endif -%}
+{%- endset -%}
+{%- if mode == "embedded" or rt.running -%}
+  {%- if hb.last_tick_ok is sameas false -%}
+  <span class="status-pill" title="上次检测失败，见 tsen run 的日志。{{ detail }}"><span class="dot dot-warn"></span>检测出错</span>
+  {%- elif (bars.failures or 0) >= 3 -%}
+  <span class="status-pill" title="分钟线采集出错（盯盘不受影响），见 tsen run 的日志。{{ detail }}"><span class="dot dot-warn"></span>采集出错{% if hb.last_tick_at %} · {{ hb.last_tick_at|local('%H:%M') }}{% endif %}</span>
+  {%- else -%}
+  <span class="status-pill" title="tsen run 运行中。{{ detail }}"><span class="dot dot-ok"></span>运行中{% if hb.last_tick_at %} · {{ hb.last_tick_at|local('%H:%M') }}{% endif %}</span>
+  {%- endif -%}
+{%- elif hb.at -%}
+  <span class="status-pill" title="没有收到 tsen run 的心跳：最后一次是 {{ hb.at|local('%m-%d %H:%M') }}。现在不检测，数据不会自动更新"><span class="dot dot-bad"></span>tsen run 未运行</span>
+{%- else -%}
+  <span class="status-pill" title="还没有 tsen run 的运行记录。现在不检测，数据不会自动更新"><span class="dot dot-unknown"></span>未运行</span>
+{%- endif -%}
+{%- if mode == "preview" %} <span class="badge badge-amber" title="正式库的内存副本，改动不保存">预览</span>{% endif -%}

@@ -1,0 +1,21 @@
+{# 事件详情（htmx 片段，放进 #cal-dialog-body） #}
+<div class="ev-detail tone-{{ c.tone }}">
+  <div class="ev-badges row">
+    <span class="badge ev-tone-badge">{{ kind_tag }}{% if c.category == 'macro' %} · {{ c.tag }}{% endif %}</span>
+    {% if c.holding %}<span class="badge badge-accent">持仓</span>{% endif %}
+    {% if c.confirmed %}<span class="badge ev-ok">已确认</span>{% else %}<span class="badge badge-outline">预计</span>{% endif %}
+    <span class="badge">{{ c.local_day.strftime('%m-%d') }} · {{ relative }}</span>
+    {% if not in_scope %}<span class="badge badge-amber" title="这家公司已经不在监控范围里">不在监控范围</span>{% endif %}
+  </div>
+  <h3 class="ev-title">{{ c.title }}</h3>
+  <dl class="ev-rows">
+    {% for name, value in rows %}
+    <div class="ev-row"><dt>{{ name }}</dt><dd>{{ value }}</dd></div>
+    {% endfor %}
+  </dl>
+  <div class="ev-foot row">
+    {% if url %}<a class="btn btn-sm" href="{{ url }}" target="_blank" rel="noopener noreferrer">打开来源 ↗</a>{% endif %}
+    <span class="spacer"></span>
+    <span class="muted small mono ev-key" title="事件 ID：要更正日期时写进 events.manual">{{ c.key }}</span>
+  </div>
+</div>

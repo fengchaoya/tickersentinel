@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% block title %}{{ v.display }} {{ v.headline }} · 异动 · tickersentinel{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static('css/alerts.css') }}">{% endblock %}
+{% block content %}
+{% set dir_class = 'up' if v.direction > 0 else 'down' if v.direction < 0 else 'flat' %}
+<nav class="detail-nav">
+  <a href="/alerts" class="back">← 异动列表</a>
+  <span class="spacer"></span>
+  {% if prev %}<a class="btn btn-sm" href="/alerts/{{ prev.id }}" title="{{ prev.display }} · {{ prev.ts|local }}">‹ 上一条</a>
+  {% else %}<span class="btn btn-sm" aria-disabled="true" disabled>‹ 上一条</span>{% endif %}
+  {% if next %}<a class="btn btn-sm" href="/alerts/{{ next.id }}" title="{{ next.display }} · {{ next.ts|local }}">下一条 ›</a>
+  {% else %}<span class="btn btn-sm" aria-disabled="true" disabled>下一条 ›</span>{% endif %}
+</nav>
+
+<section class="card alert-hero">
+  <div class="hero-main">
+    <div class="hero-title">
+      <span class="hero-arrow {{ dir_class }}">{{ '▲' if v.direction > 0 else '▼' if v.direction < 0 else '•' }}</span>
+      <h1>{{ v.display }}</h1>
+      {% if v.name %}<span class="hero-name muted">{{ v.name }}</span>{% endif %}
+      <span class="badge {{ v.seg_badge }}">{{ v.seg_name }}</span>
+      {% if v.kind %}<span class="badge badge-outline">{{ v.kind }}</span>{% endif %}
+      {% if v.is_escalation %}<span class="badge badge-amber" title="同一波行情幅度扩大到 2 倍以上，突破冷却又推了一次">扩大</span>{% endif %}
+      {% if not v.delivered %}<span class="badge badge-red" title="message_id 为空：推送没有送达（或是回放 / 预览产生的记录）">未送达</span>{% endif %}
+    </div>
+    <div class="hero-headline {{ dir_class }}">{{ v.headline }}</div>
+    <div class="hero-meta muted">
+      <span class="num">{{ v.ts|local('%Y-%m-%d %H:%M') }} {{ v.ts|tzabbr }}</span>
+      <span>{{ v.ts|weekday }}</span>
+      {% if et_time %}<span class="small">美东 {{ et_time }}</span>{% endif %}
+      <span class="small">{{ v.ts|ago }}</span>
+      <span class="small">#{{ v.id }}</span>
+    </div>
+    {% if v.describes %}
+    <ul class="trigger-list">
+      {% for d in v.describes %}<li>{{ d }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-k">现价</div><div class="stat-v num">{{ v.price_text }}</div></div>
+    <div class="stat"><div class="stat-k">{{ v.ref_label }}</div><div class="stat-v num {{ v.day_change_pct|ud }}">{{ v.day_change_pct|pct(2) }}</div></div>
+    <div class="stat"><div class="stat-k">这一波</div><div class="stat-v num {{ dir_class }}">{{ v.move_pct|pct(2) }}</div></div>
+  </div>
+</section>
+
+<div class="alert-layout">
+  <div class="stack">
+    <section class="card chart-card">
+      <div class="card-h"><h2>走势</h2><div class="actions chart-legend" id="chart-legend"></div></div>
+      <div class="card-b">
+        <div id="alert-chart" class="chart-box" data-id="{{ v.id }}" data-has-prices="{{ 1 if has_prices else 0 }}">
+          <div class="chart-skel skeleton"></div>
+        </div>
+        <div class="chart-note note" id="chart-note">纵轴是较各自参照价的涨跌（%）：{{ v.display }} {{ v.ref_label }}，基准与同业按同一口径；时间为 {{ v.ts|tzabbr }}。</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h2>归因</h2>
+        {% if attr.driver and not lead %}<div class="actions"><span class="badge {{ v.driver_badge }}">主导：{{ attr.driver }}</span></div>{% endif %}
+      </div>
+      <div class="card-b attr-body">
+        {% if lead %}
+          <p class="lead-note">
+            <span class="badge badge-outline">同一波</span>
+            这条是同一波行情的跟帖，原因见
+            {% if lead.missing %}#{{ lead.id }}（已不存在）{% else %}<a href="/alerts/{{ lead.id }}">#{{ lead.id }} {{ lead.display }} · {{ lead.ts|local('%H:%M') }} {{ lead.headline }}</a>{% endif %}
+          </p>
+          {% if lead.lead_summary %}<p class="attr-summary">{{ lead.lead_summary }}</p>{% endif %}
+        {% elif attr.structured %}
+          {% if attr.summary %}<p class="attr-summary">{{ attr.summary }}</p>{% endif %}
+          {% if attr.causes %}
+          <ol class="causes">
+            {% for c in attr.causes %}
+            <li>
+              <div class="cause-head">
+                {% if c.confidence %}<span class="badge {{ conf_badges.get(c.confidence, '') }}">{{ c.confidence }}</span>{% endif %}
+                <span>{{ c.text }}</span>
+              </div>
+              {% if c.timing or c.links or c.notes %}
+              <div class="cause-meta small muted">
+                {% if c.timing %}<span>{{ c.timing }}</span>{% endif %}
+                {% for t, url in c.links %}<a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ t }}</a>{% endfor %}
+                {% for n in c.notes %}<span class="ev-note">{{ n }}</span>{% endfor %}
+              </div>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ol>
+          {% endif %}
+          {% if attr.watch %}<p class="attr-watch"><span class="muted">关注：</span>{{ attr.watch }}</p>{% endif %}
+          {% if attr.text %}
+          <details class="raw-text"><summary class="small muted">推送里的归因原文</summary><div class="prose">{{ attr.text|md }}</div></details>
+          {% endif %}
+        {% elif attr.text %}
+          <div class="prose">{{ attr.text|md }}</div>
+        {% else %}
+          <div class="empty">还没有归因{% if recent %}（通常在推送后一两分钟内完成，稍后刷新）{% endif %}</div>
+        {% endif %}
+        {% if follows %}
+        <div class="follows">
+          <div class="small muted">同一波的跟帖</div>
+          {% for fw in follows %}
+          <a class="chip" href="/alerts/{{ fw.id }}">#{{ fw.id }} {{ fw.display }} · {{ fw.ts|local('%H:%M') }} <span class="{{ 'up' if fw.direction > 0 else 'down' }}">{{ fw.move_pct|pct }}</span></a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h2>前后日程</h2><div class="actions muted small">前后 24 小时</div></div>
+      <div class="card-b flush">
+        {% if events_before or events_ahead %}
+        <table class="data events-table">
+          {% if events_before %}
+          <tbody>
+            <tr class="ev-sec"><th colspan="2">异动前</th></tr>
+            {% for e in events_before %}
+            <tr>
+              <td class="nowrap small"><div>{{ e.rel }}</div><div class="muted num">{{ e.when }}</div></td>
+              <td>{% if e.who %}<span class="badge{% if e.holding %} badge-accent{% endif %}">{{ e.who }}</span> {% elif e.kind == 'macro' %}<span class="badge badge-teal">宏观</span> {% endif %}
+                {% if e.url %}<a href="{{ e.url }}" target="_blank" rel="noopener noreferrer">{{ e.title }}</a>{% else %}{{ e.title }}{% endif %}
+                {% if not e.confirmed %}<span class="muted small">（预计）</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          {% endif %}
+          {% if events_ahead %}
+          <tbody>
+            <tr class="ev-sec"><th colspan="2">异动后</th></tr>
+            {% for e in events_ahead %}
+            <tr>
+              <td class="nowrap small"><div>{{ e.rel }}</div><div class="muted num">{{ e.when }}</div></td>
+              <td>{% if e.who %}<span class="badge{% if e.holding %} badge-accent{% endif %}">{{ e.who }}</span> {% elif e.kind == 'macro' %}<span class="badge badge-teal">宏观</span> {% endif %}
+                {% if e.url %}<a href="{{ e.url }}" target="_blank" rel="noopener noreferrer">{{ e.title }}</a>{% else %}{{ e.title }}{% endif %}
+                {% if not e.confirmed %}<span class="muted small">（预计）</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          {% endif %}
+        </table>
+        {% else %}
+        <div class="empty">前后 24 小时的事件日历里没有日程</div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <div class="card-h"><h2>拆分</h2>{% if v.window_label %}<div class="actions muted small">{{ v.window_label }}</div>{% endif %}</div>
+      <div class="card-b">
+        {% if v.sector_pct is not none and v.idio_pct is not none %}
+        <dl class="kv">
+          <dt>原始涨跌</dt><dd class="num {{ v.raw_pct|ud }}">{{ v.raw_pct|pct(2) }}</dd>
+          <dt>板块部分</dt><dd class="num"><span class="{{ v.sector_pct|ud }}">{{ v.sector_pct|pct(2) }}</span>
+            <span class="muted small">= {{ v.bench_display or '基准' }} {{ v.bench_move_pct|pct(2) }} × β{{ '%.2f'|format(v.beta) }}</span></dd>
+          <dt>个股特异</dt><dd class="num {{ v.idio_pct|ud }}">{{ v.idio_pct|pct(2) }}</dd>
+          {% if v.volume_ratio is not none %}<dt>成交量</dt><dd class="num">历史同时段的 {{ '%.1f'|format(v.volume_ratio) }} 倍</dd>{% endif %}
+        </dl>
+        {% if v.bar %}
+        <div class="split-bar big" title="按绝对值的占比"><i class="sb-sector" style="width: {{ v.bar.sector }}%"></i><i class="sb-idio" style="width: {{ v.bar.idio }}%"></i></div>
+        <div class="split-legend small muted"><span><i class="sw sb-sector"></i>板块 {{ v.bar.sector|round|int }}%</span><span><i class="sw sb-idio"></i>个股 {{ v.bar.idio|round|int }}%</span></div>
+        {% endif %}
+        {% if v.judgment %}<p class="judgment">{{ v.judgment }}</p>{% endif %}
+        {% else %}
+        <p class="muted small">这条异动没有板块拆分{% if v.bench_display %}（基准 {{ v.bench_display }}）{% endif %}：海外股票、期货、加密货币不拆分，旧记录也可能没有。</p>
+        {% if v.volume_ratio is not none %}<p class="small">成交量：历史同时段的 {{ '%.1f'|format(v.volume_ratio) }} 倍</p>{% endif %}
+        {% endif %}
+        {% if v.peers %}
+        <div class="peers">
+          <div class="small muted">同期（{{ v.window_label }}）</div>
+          <div class="peer-chips">
+            {% for p in v.peers %}<span class="chip chip-static" title="{{ p.symbol }}">{{ p.label }} <span class="num {{ p.pct|ud }}">{{ p.pct|pct }}</span></span>{% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h2>宏观快照</h2>{% if macro and macro.at %}<div class="actions muted small">{{ macro.at|local('%H:%M') }} {{ macro.at|tzabbr }}</div>{% endif %}</div>
+      <div class="card-b">
+        {% if macro %}
+          {% for gname, items in macro.groups %}
+          <div class="macro-group">
+            <div class="macro-gname">{{ gname }}</div>
+            <div class="macro-items">
+              {% for q in items %}
+              <div class="macro-item" title="{{ q.symbol }} · {{ q.change_label }}{% if q.change_1h %}；近 1 小时 {{ q.change_1h }}{% endif %}">
+                <span class="mi-name">{{ q.name }}</span>
+                <span class="mi-val num">{{ q.value }}</span>
+                <span class="mi-chg num {{ q.change_class }}">{{ q.change }}{% if q.change_label not in ('较昨收',) %}<span class="muted"> {{ q.change_label }}</span>{% endif %}</span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+          {% for tname, items in macro.themes %}
+          <div class="macro-group">
+            <div class="macro-gname">{{ tname }}</div>
+            <div class="macro-items">
+              {% for q in items %}
+              <div class="macro-item" title="{{ q.symbol }} · {{ q.change_label }}">
+                <span class="mi-name">{{ q.name }}</span>
+                <span class="mi-val num">{{ q.value }}</span>
+                <span class="mi-chg num {{ q.change_class }}">{{ q.change }}{% if q.change_label not in ('较昨收',) %}<span class="muted"> {{ q.change_label }}</span>{% endif %}</span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+          {% if macro.curve %}
+          <div class="macro-group">
+            <div class="macro-gname">财政部收益率{% if macro.curve_day %}（{{ macro.curve_day }}）{% endif %}</div>
+            <div class="small num">{% for k, val in macro.curve %}<span class="curve-item"><span class="muted">{{ k }}</span> {{ val }}</span>{% endfor %}</div>
+          </div>
+          {% endif %}
+          <p class="note">没写参照的是较昨收；24h = 较 24 小时前。利率与期货约延迟 10–15 分钟。</p>
+        {% else %}
+          <p class="muted small">推送这条时没有附宏观快照（旧记录、取数超时，或设置里关掉了）。</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="card macro-moves">
+      <div class="card-h"><h2>宏观同期变化</h2><div class="actions"><a class="small" href="/macro?alert={{ alert_id }}">在宏观页查看 →</a></div></div>
+      <div class="card-b">
+        {% if moves.start %}
+        <div class="small muted mm-span">
+          <span class="num">{{ moves.start|local('%m-%d %H:%M') }} – {% if moves.start|local('%m-%d') != moves.end|local('%m-%d') %}{{ moves.end|local('%m-%d') }} {% endif %}{{ moves.end|local('%H:%M') }} {{ moves.end|tzabbr }}</span>
+          <span>（这一波的起点 → 异动时刻）</span>
+        </div>
+        {% endif %}
+        {% if moves.state == "ok" %}
+        <table class="mm-table">
+          <thead><tr><th>变量</th><th class="num">变化</th><th class="num" title="z = 变化 ÷ 平常的波动">z</th><th class="mm-bar-h"></th></tr></thead>
+          <tbody>
+            {% for it in moves["items"] %}
+            <tr class="{{ 'mm-strong' if it.strong else '' }}">
+              <td class="mm-name" title="{{ it.symbol }}{% if it.group %} · {{ it.group }}{% endif %}">{{ it.name }}</td>
+              <td class="num {{ it.change|ud }}">{{ it.change_text }}</td>
+              <td class="num mm-z">{% if it.strong %}<strong>{{ it.z_text }}</strong>{% else %}{{ it.z_text }}{% endif %}</td>
+              <td class="mm-bar-c"><span class="mm-bar"><i class="{{ it.change|ud }}" style="width: {{ it.bar }}%"></i></span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <p class="note">z = 变化 ÷ 平常的波动（之前两周 5 分钟变化的稳健标准差，按这段时间的长短放大）；|z| ≥ 2 加粗。利率按 bp，其他按 %。</p>
+        {% elif moves.state == "error" %}
+        <p class="muted small">宏观同期变化算不出来：{{ moves.reason }}</p>
+        {% elif moves.state == "no_store" %}
+        <p class="muted small">分钟线库没有打开，看不到宏观同期变化。</p>
+        {% else %}
+        <p class="muted small">分钟线库里还没有这段时间的宏观数据。</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="card" id="label-card">
+      <div class="card-h"><h2>标注</h2>{% if v.label or v.notes %}<div class="actions"><span class="badge badge-green">已标注</span></div>{% endif %}</div>
+      <form class="card-b label-form" hx-post="/api/alerts/{{ v.id }}/label" hx-target="#label-result" hx-swap="innerHTML">
+        <label class="field">真实原因（事后回看时填）
+          <textarea name="label" rows="3" maxlength="{{ max_text }}" placeholder="例如：同业 WDC 盘后财报指引下调，板块联动">{{ v.label or '' }}</textarea>
+        </label>
+        <label class="field">备注
+          <textarea name="notes" rows="2" maxlength="{{ max_text }}" placeholder="归因对不对、还差什么信息……">{{ v.notes or '' }}</textarea>
+        </label>
+        <div class="row">
+          <button class="btn btn-primary btn-sm" type="submit">保存</button>
+          <span class="htmx-indicator"><span class="spinner"></span></span>
+          <span id="label-result" class="small" aria-live="polite"></span>
+        </div>
+        <p class="note">清空后保存 = 删除标注。标注记在 alerts 表的 label / notes 两列，是事件研究数据集的一部分（评估归因准确率、校准阈值）。
+          打开了飞书多维表格同步时，表格里的「label 真实原因」「notes 备注」也会拉回这里，以那边的非空值为准。</p>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ static('vendor/lightweight-charts.standalone.production.js') }}"></script>
+<script src="{{ static('js/alerts.js') }}"></script>
+{% endblock %}

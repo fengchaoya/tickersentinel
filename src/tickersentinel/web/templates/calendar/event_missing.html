@@ -1,0 +1,11 @@
+{# 不认识的事件 key（htmx 片段，状态码 404） #}
+<div class="empty ev-missing">
+  {% if broken %}
+  <div>这个事件的数据有问题，显示不了详情</div>
+  <div class="small">可以等下一次刷新日历（<code>tsen events</code>）后再看。</div>
+  {% else %}
+  <div>找不到这个事件</div>
+  <div class="small">它可能已经被更新或清掉了（例如估计日期换了季度），刷新页面再看看。</div>
+  {% endif %}
+  {% if key %}<div class="small mono muted">{{ key }}</div>{% endif %}
+</div>

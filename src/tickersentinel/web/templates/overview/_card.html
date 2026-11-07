@@ -1,0 +1,87 @@
+{# 消息流的一张卡片（overview_feed.FeedItem）。nested=True 时是挂在异动下面的回复（归因、同一波的跟帖）。
+   页面首屏、往前翻页、SSE 推来的新消息都用这一个宏，样式一致。 #}
+{% macro meta(it) -%}
+  <span class="fc-time" title="{{ it.at|local('%Y-%m-%d %H:%M:%S') }} {{ it.at|tzabbr }}{% if it.channel %} · {{ it.channel }}{% endif %}">{{ when(it.at) }}<span class="fc-ago"> · {{ it.at|ago }}</span></span>
+  {%- if it.history %} <span class="badge badge-outline" title="网页推送记录启用之前的数据，按异动 / 简报记录重排">历史记录</span>{% endif %}
+  {%- if not it.ok %} <span class="badge badge-red" title="{{ it.error or '发送失败' }}">未送达</span>{% endif %}
+{%- endmacro %}
+
+{% macro alert_links(it) -%}
+  {%- if it.alerts -%}
+  <div class="fc-links">
+    {%- for a in it.alerts %}<a class="fc-link" href="/alerts/{{ a.id }}">{{ a.symbol|display }} 详情 →</a>{% endfor -%}
+  </div>
+  {%- elif it.alert_ids -%}
+  <div class="fc-links">
+    {%- for i in it.alert_ids %}<a class="fc-link" href="/alerts/{{ i }}">异动 #{{ i }} →</a>{% endfor -%}
+  </div>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro reply(it) -%}
+{%- set d = it.direction -%}
+<details class="fc-reply fc-reply-{{ it.kind }}" data-key="{{ it.key }}"{% if it.id %} data-id="{{ it.id }}"{% endif %}{% if it.message_id %} data-mid="{{ it.message_id }}"{% endif %} data-kind="{{ it.kind }}">
+  <summary>
+    {%- if it.kind == 'attribution' %}<span class="fc-rtag">归因</span>
+    {%- elif it.kind == 'alert' %}<span class="fc-rtag {{ 'up' if d > 0 else 'down' if d < 0 else '' }}">{{ '▲' if d > 0 else '▼' if d < 0 else '•' }} 跟帖</span>
+    {%- else %}<span class="fc-rtag">{{ it.kind_name }}</span>{% endif %}
+    <span class="fc-rsum">{{ it.preview if it.kind == 'attribution' else it.clean_title }}</span>
+    <span class="fc-rmeta">{{ meta(it) }}</span>
+  </summary>
+  <div class="fc-rbody">
+    {%- if it.kind != 'attribution' %}<div class="fc-rtitle">{{ it.clean_title }}</div>{% endif %}
+    {%- set main, extra = it.parts %}
+    <div class="prose">{{ main|md }}</div>
+    {%- if extra %}<details class="fc-snap"><summary>宏观快照</summary><div class="prose">{{ extra|md }}</div></details>{% endif %}
+    {%- if it.kind == 'alert' %}{{ alert_links(it) }}{% endif %}
+    {%- if it.kind == 'attribution' and it.lead_id %}
+    <div class="fc-links"><a class="fc-link" href="/alerts/{{ it.lead_id }}">同一波的第一条 #{{ it.lead_id }} →</a></div>
+    {%- endif %}
+  </div>
+</details>
+{%- endmacro %}
+
+{% macro card(it, nested=false) -%}
+{%- if nested -%}
+{{ reply(it) }}
+{%- else -%}
+{%- set d = it.direction if it.kind == 'alert' else 0 -%}
+<article class="fc fc-{{ it.kind }}{% if d > 0 %} fc-up{% elif d < 0 %} fc-down{% endif %}{% if not it.ok %} fc-failed{% endif %}"
+         data-key="{{ it.key }}"{% if it.id %} data-id="{{ it.id }}"{% endif %}{% if it.message_id %} data-mid="{{ it.message_id }}"{% endif %}
+         data-kind="{{ it.kind }}" data-alert-ids="{{ it.alert_ids|join(',') }}">
+  <div class="fc-icon" aria-hidden="true">
+    {%- if it.kind == 'alert' %}{{ '▲' if d > 0 else '▼' if d < 0 else '•' }}
+    {%- elif it.kind == 'attribution' %}↳
+    {%- elif it.kind == 'brief' %}≡
+    {%- elif it.kind == 'events' %}▦
+    {%- elif it.kind == 'macro' %}◎
+    {%- elif it.kind == 'error' %}!
+    {%- else %}i{% endif -%}
+  </div>
+  <div class="fc-main">
+    <header class="fc-h">
+      <span class="fc-kind">{{ it.kind_name }}</span>
+      <span class="fc-meta">{{ meta(it) }}
+        <button type="button" class="fc-ask" data-ask title="切到对话，带着这条推送提问（像在飞书里回复这条消息）">问一下</button></span>
+    </header>
+    {%- if it.kind in ('brief', 'events', 'macro') %}
+    <details class="fc-fold">
+      <summary><span class="fc-title">{{ it.clean_title }}</span><span class="fc-preview">{{ it.preview }}</span></summary>
+      <div class="prose fc-body">{{ it.body|md }}</div>
+    </details>
+    {%- else %}
+    <div class="fc-title">{{ it.clean_title }}</div>
+    {%- set main, extra = it.parts %}
+    {%- if main %}<div class="prose fc-body">{{ main|md }}</div>{% endif %}
+    {%- if extra %}<details class="fc-snap"><summary>宏观快照</summary><div class="prose">{{ extra|md }}</div></details>{% endif %}
+    {%- if it.kind in ('alert', 'attribution') %}{{ alert_links(it) }}{% endif %}
+    {%- endif %}
+    {%- if it.kind == 'alert' or it.thread %}
+    <div class="fc-thread">
+      {%- for child in it.thread %}{{ reply(child) }}{% endfor -%}
+    </div>
+    {%- endif %}
+  </div>
+</article>
+{%- endif -%}
+{%- endmacro %}

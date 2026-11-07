@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}宏观 · tickersentinel{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static('css/macro.css') }}">{% endblock %}
+
+{% block content %}
+<div id="macro-root" data-query="{{ query }}" data-tz="{{ tzname }}" data-store="{{ '1' if has_store else '0' }}"
+     data-readonly="{{ '1' if readonly else '0' }}" data-can-refresh="{{ '1' if can_refresh else '0' }}">
+
+<div class="page-head">
+  <div>
+    <h1>宏观</h1>
+    <div class="sub">
+      {{ win_name }}：<span class="num">{{ win_start|local('%m-%d %H:%M') }} – {{ win_end|local('%m-%d %H:%M') }}</span> {{ win_end|tzabbr }}
+      · 纵轴是实际值，虚线是窗口起点；标题旁是较起点的变化（收益率用 bp，其他用 %）
+    </div>
+  </div>
+  <div class="mc-toolbar">
+    <nav class="seg-ctl" aria-label="时间窗口">
+      {% for k, name in windows.items() %}
+      <a href="/macro?window={{ k }}{% if live %}&amp;live=1{% endif %}" class="{% if current == k %}on{% endif %}"{% if current == k %} aria-current="page"{% endif %}>{{ name }}</a>
+      {% endfor %}
+    </nav>
+    <form class="mc-custom{% if custom %} on{% endif %}" method="get" action="/macro" aria-label="自定义时间段">
+      <input type="datetime-local" name="start" value="{{ start_input }}" required aria-label="开始（本地时间）" title="开始（本地时间 {{ tzname }}）">
+      <span class="muted">–</span>
+      <input type="datetime-local" name="end" value="{{ end_input }}" aria-label="结束（本地时间，留空 = 现在）" title="结束（本地时间；留空 = 现在）">
+      <button type="submit" class="btn btn-sm">看这一段</button>
+    </form>
+  </div>
+</div>
+
+{% for w in warnings %}
+<div class="mc-alert">{{ w }}</div>
+{% endfor %}
+
+{% if anchored %}
+<div class="mc-anchor small">
+  {% if anchored.live %}
+  <span>截到现在：{{ '周末休市' if anchored.weekend else '最近两小时没有新行情' }}，这段时间大多只有比特币有数据。</span>
+  <a href="/macro?window={{ current or '24h' }}">回到最近收盘 →</a>
+  {% else %}
+  <span class="badge badge-amber">{{ '周末休市' if anchored.weekend else '休市或数据没更新' }}</span>
+  <span>显示的是截至 <span class="num">{{ anchored.at|local('%m-%d %H:%M') }}</span> {{ anchored.at|tzabbr }}（宏观变量和持仓里最晚的一笔行情{% if anchored.weekend %}：周五是美股盘后结束，期货、商品在美东 17:00 就停了{% endif %}）的{{ win_name }}{% if not anchored.weekend %}——节假日休市，或 <code>tsen run</code> 没在运行{% endif %}；比特币也画同一段，方便横向比。</span>
+  <a href="/macro?window={{ current or '24h' }}&amp;live=1">截到现在 →</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if alert_info %}
+<div class="mc-context card">
+  <span class="badge badge-accent">异动前后</span>
+  <a href="/alerts/{{ alert_info.id }}" class="mc-context-link">
+    <strong>{{ alert_info.display }}</strong>{% if alert_info.name and alert_info.name != alert_info.display %} {{ alert_info.name }}{% endif %}
+    <span class="num">{{ alert_info.ts|local('%m-%d %H:%M') }} {{ alert_info.ts|tzabbr }}</span>
+    {% if alert_info.move_pct is not none %}<span class="num {{ alert_info.move_pct|ud }}">{{ alert_info.move_pct|pct(2) }}</span>{% endif %}
+  </a>
+  <span class="muted small">异动前 3 小时到后 90 分钟 · <a href="/alerts/{{ alert_info.id }}">回到这条异动 →</a></span>
+</div>
+{% endif %}
+
+<div class="mc-fresh row small">
+  <span id="mc-fresh" class="muted">{% if has_store %}正在读取分钟线库…{% else %}分钟线库没有打开{% endif %}</span>
+  {% if readonly %}<span class="badge badge-amber">预览模式：只读，不能补抓</span>{% endif %}
+  {% if can_refresh %}
+  <button type="button" class="btn btn-sm" id="mc-refresh" title="马上从数据源补抓一轮分钟线">现在补抓</button>
+  {% endif %}
+  <span id="mc-refresh-note" class="muted"></span>
+</div>
+
+{% if not has_store %}
+<div class="card"><div class="empty">
+  <div class="mc-empty-t">分钟线库没有打开</div>
+  <p>宏观页的数据来自本地分钟线库（<code>data/bars.sqlite3</code>）。运行 <code>tsen run</code>（会自动补最近 29 天）或 <code>tsen bars --backfill</code> 之后再打开这一页。</p>
+</div></div>
+{% else %}
+
+<div id="mc-empty" class="card mc-empty hidden">
+  <div class="empty">
+    <div class="mc-empty-t">这段时间里分钟线库没有数据</div>
+    <p>第一次用的话：运行 <code>tsen run</code>（定时补库，第一次会在后台补最近 29 天），或者先跑一次 <code>tsen bars --backfill</code>。</p>
+  </div>
+</div>
+
+<div class="mc-layout">
+  <aside class="mc-side">
+    <section class="card mc-movers" aria-labelledby="mv-title">
+      <div class="card-h">
+        <h2 id="mv-title">谁动了</h2>
+        <span class="muted small" id="mv-range"></span>
+        <div class="actions">
+          <button type="button" class="btn btn-sm hidden" id="mv-reset">恢复整个窗口</button>
+        </div>
+      </div>
+      <div class="card-b mv-body" id="mv-list" aria-live="polite">
+        <div class="skeleton mv-skel"></div><div class="skeleton mv-skel"></div><div class="skeleton mv-skel"></div>
+      </div>
+      <div class="card-f note">
+        z = 这段时间的变化 ÷ 这个变量平常的波动（前两周 5 分钟变化的稳健标准差，按时长放大），|z| ≥ 2 算明显（横条上的虚线）。
+        在任一张小图上<strong>按住鼠标拖一段</strong>，只算那一段。
+      </div>
+    </section>
+  </aside>
+
+  <div class="mc-main">
+    <section class="card mc-trends">
+      <div class="card-h">
+        <h2>趋势</h2>
+        <span class="muted small" id="tr-step"></span>
+        <div class="actions">
+          <nav class="seg-ctl" aria-label="排列方式">
+            <button type="button" data-layout="grid" class="on">分开</button>
+            <button type="button" data-layout="compare">对比<span id="cmp-count" class="cmp-count"></span></button>
+          </nav>
+        </div>
+      </div>
+      <div class="card-b">
+        <div id="tr-grid" class="tr-groups">
+          <div class="tr-grid"><div class="skeleton tr-skel"></div><div class="skeleton tr-skel"></div><div class="skeleton tr-skel"></div></div>
+        </div>
+        <div id="tr-compare" class="hidden">
+          <div class="cmp-picks" id="cmp-picks" role="group" aria-label="选要对比的变量"></div>
+          <div class="cmp-h">
+            <div class="cmp-legend" id="cmp-legend"></div>
+            <div class="cmp-tools">
+              <nav class="seg-ctl" aria-label="纵轴">
+                <button type="button" data-norm="raw" class="on" title="较窗口起点的变化：右边纵轴 %，左边纵轴是收益率的 bp（虚线）">% / bp</button>
+                <button type="button" data-norm="sigma" title="变化 ÷ 这个变量平常一天的波动：所有变量同一根纵轴，可以直接比强弱">几倍日波动</button>
+              </nav>
+              <button type="button" class="btn btn-sm" id="cmp-clear">清空</button>
+            </div>
+          </div>
+          <div class="ov-chart" id="cmp-chart"></div>
+          <p class="note">
+            点上面的标签把变量加进来、再点一下拿掉（最多 8 个）；也可以在“分开”视图里点小图的“＋对比”，或在“谁动了”里点一行。
+            <strong>% / bp</strong>：价格类按较起点的 %（右边纵轴），收益率按 bp（左边纵轴，虚线）——两根纵轴的刻度不一样，看走势的先后和方向，别比高低。
+            <strong>几倍日波动</strong>：每个变量的变化除以它平常一天的波动（前两周 5 分钟变化的稳健标准差折算到一天），
+            所有变量在同一根纵轴上，强弱可以直接比。
+          </p>
+        </div>
+      </div>
+      <div class="card-f">
+        <div class="row small"><strong>窗口里的异动</strong><span class="muted">（图上的箭头；点箭头或下面的条目打开详情）</span></div>
+        <ul class="mc-alerts" id="mc-alerts"><li class="muted small">—</li></ul>
+        <div class="note mc-credit">图表：<a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView Lightweight Charts™</a></div>
+      </div>
+    </section>
+
+    <section class="card mc-curve">
+      <div class="card-h">
+        <h2>收益率曲线</h2>
+        <span class="muted small">美国财政部每日收益率，最近 180 天（日线）</span>
+      </div>
+      <div class="card-b">
+        <div class="cv-grid">
+          <div>
+            <div class="cv-h"><strong>2Y / 10Y / 30Y</strong><span class="ov-legend" id="cv-legend"></span></div>
+            <div class="cv-chart" id="cv-levels"></div>
+          </div>
+          <div>
+            <div class="cv-h"><strong>2s10s 利差</strong><span class="muted small">10Y − 2Y，bp</span><span class="ov-legend" id="cv-legend-spread"></span></div>
+            <div class="cv-chart" id="cv-spread"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if has_store %}
+<script src="{{ static('vendor/lightweight-charts.standalone.production.js') }}"></script>
+<script src="{{ static('js/macro.js') }}"></script>
+{% endif %}
+{% endblock %}

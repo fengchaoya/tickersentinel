@@ -1,0 +1,24 @@
+{# 今日异动（overview_panels.today_alerts）：按标的汇总，点进去是异动页的筛选 #}
+{#- 日期放在片段里（每 60 秒随片段刷新），过了本地午夜会跟着换 #}
+{%- if ta.error %}
+<div class="empty">今日异动暂时读不到<br><span class="small">{{ ta.error }}</span></div>
+{%- elif not ta.symbols %}
+<div class="empty">今天{% if ta.day %}（{{ ta.day }}）{% endif %}还没有异动</div>
+{%- else %}
+<ul class="ta-list">
+  {%- for s in ta.symbols %}
+  <li>
+    <a class="ta-row" href="/alerts?symbol={{ s.symbol|urlencode }}" title="到异动页看 {{ s.symbol|display }} 的全部异动">
+      <span class="ta-dir {{ 'up' if s.last_direction > 0 else 'down' if s.last_direction < 0 else 'flat' }}">{{ '▲' if s.last_direction > 0 else '▼' if s.last_direction < 0 else '•' }}</span>
+      <span class="ta-name">{{ s.symbol|display }}</span>
+      <span class="ta-count" title="上涨 {{ s.ups }} 次，下跌 {{ s.downs }} 次">{{ s.count }} 次</span>
+      <span class="ta-move num {{ s.best_move|ud }}" title="幅度最大的一次">
+        {%- if s.best_move is not none %}{{ '%+.1f'|format(s.best_move) }}{{ s.best_unit }}{% else %}—{% endif -%}
+      </span>
+      <span class="ta-time num muted">{{ s.last_at|local('%H:%M') if s.last_at else '—' }}</span>
+    </a>
+  </li>
+  {%- endfor %}
+</ul>
+<div class="ta-foot muted small">{% if ta.day %}{{ ta.day }} · {% endif %}{{ ta.symbols|length }} 只 · 共 {{ ta.total }} 次</div>
+{%- endif %}

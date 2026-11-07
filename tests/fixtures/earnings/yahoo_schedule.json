@@ -1,0 +1,216 @@
+{
+ "finance": {
+  "result": [
+   {
+    "documents": [
+     {
+      "entityIdType": "SP_EARNINGS",
+      "columns": [
+       {
+        "id": "ticker",
+        "label": "Symbol",
+        "type": "STRING"
+       },
+       {
+        "id": "eventname",
+        "label": "Event Name",
+        "type": "STRING"
+       },
+       {
+        "id": "startdatetime",
+        "label": "Event Start Date",
+        "type": "DATE"
+       },
+       {
+        "id": "startdatetimetype",
+        "label": "Event Start Date",
+        "type": "STRING"
+       },
+       {
+        "id": "dateisestimate",
+        "label": "Estimate Date",
+        "type": "BOOLEAN"
+       },
+       {
+        "id": "eventtype",
+        "label": "Event Type",
+        "type": "STRING"
+       },
+       {
+        "id": "epsestimate",
+        "label": "EPS Estimate",
+        "type": "NUMBER"
+       },
+       {
+        "id": "epsactual",
+        "label": "Reported EPS",
+        "type": "NUMBER"
+       },
+       {
+        "id": "timeZoneShortName",
+        "label": "Timezone short name",
+        "type": "STRING"
+       },
+       {
+        "id": "gmtOffsetMilliSeconds",
+        "label": "GMT Offset",
+        "type": "NUMBER"
+       },
+       {
+        "id": "fiscalyear",
+        "label": "Financial Calendar Year",
+        "type": "STRING"
+       }
+      ],
+      "rows": [
+       [
+        "TSM",
+        "Q4 2026 Earnings Announcement",
+        "2027-01-14T12:30:00.000Z",
+        "BMO",
+        true,
+        "EAD",
+        5.16,
+        null,
+        "EST",
+        -18000000,
+        "2026"
+       ],
+       [
+        "MU",
+        "Q1 2027 Earnings Announcement",
+        "2026-12-23T20:00:00.000Z",
+        "AMC",
+        true,
+        "EAD",
+        38.28,
+        null,
+        "EST",
+        -18000000,
+        "2027"
+       ],
+       [
+        "285A.T",
+        "Q2 2026 Earnings Announcement",
+        "2026-10-30T06:30:00.000Z",
+        "TNS",
+        false,
+        "EAD",
+        31.28,
+        null,
+        "JST",
+        32400000,
+        "2026"
+       ],
+       [
+        "SNDK",
+        "Q1 2027 Earnings Announcement",
+        "2026-10-29T20:00:00.000Z",
+        "AMC",
+        false,
+        "EAD",
+        46.27,
+        null,
+        "EDT",
+        -14400000,
+        "2027"
+       ],
+       [
+        "SKHY",
+        "Q3 2026 Earnings Announcement",
+        "2026-10-27T20:00:00.000Z",
+        "TNS",
+        false,
+        "EAD",
+        6.25,
+        null,
+        "EDT",
+        -14400000,
+        "2026"
+       ],
+       [
+        "STX",
+        "Q1 2027 Earnings Announcement",
+        "2026-10-27T20:00:00.000Z",
+        "AMC",
+        false,
+        "EAD",
+        7.4,
+        null,
+        "EDT",
+        -14400000,
+        "2027"
+       ],
+       [
+        "000660.KS",
+        "Q3 2026 Earnings Announcement",
+        "2026-10-27T06:00:00.000Z",
+        "TNS",
+        false,
+        "EAD",
+        86312.01,
+        null,
+        "KST",
+        32400000,
+        "2026"
+       ],
+       [
+        "WDC",
+        "Q1 2027 Earnings Announcement",
+        "2026-10-22T20:00:00.000Z",
+        "AMC",
+        false,
+        "EAD",
+        4.08,
+        null,
+        "EDT",
+        -14400000,
+        "2027"
+       ],
+       [
+        "MU",
+        null,
+        "2026-09-30T20:01:00.000Z",
+        "TAS",
+        false,
+        "ERA",
+        31.82,
+        33.42,
+        "EDT",
+        -14400000,
+        "2026"
+       ],
+       [
+        "285A.T",
+        null,
+        "2026-07-31T06:35:02.000Z",
+        "TAS",
+        false,
+        "ERA",
+        590.1,
+        513.3,
+        "JST",
+        32400000,
+        "2027"
+       ],
+       [
+        "000660.KS",
+        null,
+        "2026-07-29T00:00:00.000Z",
+        "TAS",
+        false,
+        "ERA",
+        70975.39,
+        131478.0,
+        "KST",
+        32400000,
+        "2026"
+       ]
+      ]
+     }
+    ]
+   }
+  ],
+  "error": null
+ }
+}

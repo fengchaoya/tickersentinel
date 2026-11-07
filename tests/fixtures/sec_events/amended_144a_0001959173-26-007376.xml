@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- EDGAR 0001959173-26-007376（非本项目标的的 144/A，带 previousAccessionNumber），删减同上；人名已替换 --><edgarSubmission xmlns="http://www.sec.gov/edgar/ownership" xmlns:com="http://www.sec.gov/edgar/common">
+  <headerData>
+    <submissionType>144/A</submissionType>
+    <previousAccessionNumber>0001959173-26-007374</previousAccessionNumber>
+  </headerData>
+  <formData>
+    <issuerInfo>
+      <issuerCik>0001784570</issuerCik>
+      <issuerName>BETA Technologies, Inc.</issuerName>
+      <nameOfPersonForWhoseAccountTheSecuritiesAreToBeSold>Doe Jane</nameOfPersonForWhoseAccountTheSecuritiesAreToBeSold>
+      <relationshipsToIssuer>
+        <relationshipToIssuer>Officer</relationshipToIssuer>
+      </relationshipsToIssuer>
+    </issuerInfo>
+    <securitiesInformation>
+      <securitiesClassTitle>Common</securitiesClassTitle>
+      <brokerOrMarketmakerDetails>
+        <name>Fidelity Brokerage Services LLC</name>
+      </brokerOrMarketmakerDetails>
+      <noOfUnitsSold>10000</noOfUnitsSold>
+      <aggregateMarketValue>175789.00</aggregateMarketValue>
+      <noOfUnitsOutstanding>225439576</noOfUnitsOutstanding>
+      <approxSaleDate>10/14/2026</approxSaleDate>
+      <securitiesExchangeName>NYSE</securitiesExchangeName>
+    </securitiesInformation>
+    <remarks>
+Shares are being sold from a family trust</remarks>
+    <noticeSignature>
+      <noticeDate>10/14/2026</noticeDate>
+      <planAdoptionDates>
+        <planAdoptionDate>06/25/2026</planAdoptionDate>
+      </planAdoptionDates>
+    </noticeSignature>
+  </formData>
+</edgarSubmission>

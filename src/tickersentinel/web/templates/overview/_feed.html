@@ -1,0 +1,23 @@
+{# 消息流的一页：卡片 + “加载更早的”按钮（点了以后整块换成下一页，按钮跟在最后） #}
+{%- from "overview/_card.html" import card with context -%}
+{%- for it in page.items %}
+{{ card(it) }}
+{%- endfor %}
+{%- if page.has_more %}
+<div class="feed-more">
+  <button type="button" class="btn btn-sm"
+          hx-get="/partials/overview/feed?{% if page.next_before_id %}before_id={{ page.next_before_id }}{% else %}before_ts={{ page.next_before_ts|urlencode }}{% endif %}"
+          hx-target="closest .feed-more" hx-swap="outerHTML" hx-disabled-elt="this">
+    加载更早的 <span class="spinner htmx-indicator"></span>
+  </button>
+</div>
+{%- elif page.items and more %}
+<div class="feed-end muted small">没有更早的了</div>
+{%- elif not page.items and not more %}
+<div class="empty feed-empty">
+  还没有推送记录。<br>
+  <span class="small">tsen run 运行后，异动、归因、简报、事件汇总会出现在这里，和飞书里收到的一样。</span>
+</div>
+{%- elif more %}
+<div class="feed-end muted small">没有更早的了</div>
+{%- endif %}

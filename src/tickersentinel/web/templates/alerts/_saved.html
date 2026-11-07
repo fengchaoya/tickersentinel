@@ -1,0 +1,2 @@
+{# 标注保存后的小提示（htmx 片段，不继承 base.html） #}
+<span class="saved-ok">✓ 已保存 {{ when }}</span>{% if readonly %}<span class="muted">（预览模式：只存在内存副本里，不会写入正式库）</span>{% endif %}

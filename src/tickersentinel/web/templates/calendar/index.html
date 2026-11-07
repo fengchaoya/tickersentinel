@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}事件日历 · tickersentinel{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static('css/calendar.css') }}">{% endblock %}
+
+{% macro q(view_=None, month_=None, days_=None, cat_=None) -%}
+/calendar?view={{ view_ or view }}
+{%- if (view_ or view) == 'month' %}&amp;month={{ (month_ or month or today).strftime('%Y-%m') }}{% else %}&amp;days={{ days_ or days }}{% endif -%}
+&amp;cat={{ cat_ or cat }}
+{%- endmacro %}
+
+{% macro chip(c) -%}
+<button type="button" class="chip tone-{{ c.tone }}{% if c.holding %} is-hold{% endif %}{% if not c.confirmed %} is-est{% endif %}"
+        data-ev-key="{{ c.key }}" title="{{ c.tooltip }}" aria-haspopup="dialog">
+  {%- if c.time_label %}<span class="chip-t">{{ c.time_label }}</span>{% endif -%}
+  <span class="chip-x">{{ c.title }}</span>
+</button>
+{%- endmacro %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>事件日历</h1>
+    <div class="sub">
+      {% if refreshed %}
+        日历更新于 <span title="{{ refreshed|local('%Y-%m-%d %H:%M') }} {{ refreshed|tzabbr }}">{{ refreshed|local }} {{ refreshed|tzabbr }}</span>（{{ refreshed|ago }}）
+      {% else %}
+        日历还没有刷新过
+      {% endif %}
+      · 收集未来 {{ lookahead }} 天 · 时间按 {{ tzname }} 本地时间{% if tz_label %}（{{ tz_label }}）{% endif %}
+    </div>
+  </div>
+  <div class="cal-toolbar row">
+    <nav class="seg-ctl" aria-label="视图">
+      {% for k, name in views.items() %}
+      <a href="{{ q(view_=k) }}" class="{% if view == k %}on{% endif %}"{% if view == k %} aria-current="page"{% endif %}>{{ name }}</a>
+      {% endfor %}
+    </nav>
+    <nav class="seg-ctl" aria-label="分类">
+      {% for k, name in categories.items() %}
+      <a href="{{ q(cat_=k) }}" class="{% if cat == k %}on{% endif %}"{% if cat == k %} aria-current="page"{% endif %}>{{ name }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+</div>
+
+{% if stale %}
+<div class="cal-alert">日历超过 1 天没有刷新：<code>tsen run</code> 可能没在运行（它每天刷新两次），也可以手动跑一次 <code>tsen events</code>。</div>
+{% endif %}
+{% if view == 'month' and not month_ok %}
+<div class="cal-alert">月份参数格式不对（应为 YYYY-MM），已显示本月。</div>
+{% endif %}
+
+<div class="card cal-card">
+  <div class="card-h cal-head">
+    {% if view == 'month' %}
+      <div class="row cal-nav">
+        <a class="btn btn-sm" href="{{ q(month_=prev_month) }}" aria-label="上个月" title="上个月">‹</a>
+        <h2 class="cal-title">{{ month.year }} 年 {{ month.month }} 月</h2>
+        <a class="btn btn-sm" href="{{ q(month_=next_month) }}" aria-label="下个月" title="下个月">›</a>
+        {% if not is_this_month %}<a class="btn btn-sm" href="{{ q(month_=today) }}">今天</a>{% endif %}
+      </div>
+      <span class="muted small cal-count">
+        {% if counts.total %}本月 {{ counts.total }} 个事件{% if cat == 'all' %}：宏观 {{ counts.macro }} · 公司 {{ counts.company }}{% endif %}{% else %}本月没有事件{% endif %}
+      </span>
+    {% else %}
+      <h2 class="cal-title">未来 {{ days }} 天</h2>
+      <span class="muted small cal-count">{{ today.strftime('%m-%d') }} – {{ list_end.strftime('%m-%d') }}{% if counts.total %} · {{ counts.total }} 个事件{% endif %}</span>
+      <div class="actions">
+        <nav class="seg-ctl" aria-label="天数">
+          {% for n in list_days %}
+          <a href="{{ q(days_=n) }}" class="{% if days == n %}on{% endif %}"{% if days == n %} aria-current="page"{% endif %}>{{ n }} 天</a>
+          {% endfor %}
+        </nav>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if not any_events %}
+  <div class="empty cal-empty">
+    <div class="cal-empty-t">还没有事件</div>
+    <div>事件日历由 <code>tsen run</code> 每天刷新两次（财报日、内部人拟减持、宏观日程……）。<br>
+      现在就想看：在终端里运行 <code>tsen events</code>。</div>
+  </div>
+  {% elif view == 'month' %}
+  <div class="card-b flush">
+    <div class="cal-grid" role="table" aria-label="{{ month.year }} 年 {{ month.month }} 月">
+      <div class="cal-row cal-wd" role="row">
+        {% for w in weekdays %}<div class="cal-wd-c{% if loop.index > 5 %} is-weekend{% endif %}" role="columnheader">周{{ w }}</div>{% endfor %}
+      </div>
+      {% for week in weeks %}
+      <div class="cal-row" role="row">
+        {% for d in week %}
+        <div class="cal-cell{% if not d.in_month %} is-out{% endif %}{% if d.is_today %} is-today{% endif %}{% if d.is_past %} is-past{% endif %}{% if d.weekend %} is-weekend{% endif %}{% if d.holiday %} is-holiday{% endif %}"
+             role="cell" data-day="{{ d.day.isoformat() }}"{% if d.is_today %} aria-current="date"{% endif %}>
+          <div class="cal-dh">
+            <span class="cal-dn">{% if d.day.day == 1 and not d.in_month %}{{ d.day.month }}/{% endif %}{{ d.day.day }}</span>
+            {% if d.is_today %}<span class="cal-today">今天</span>{% endif %}
+            {% if d.holiday %}<span class="cal-hol">{{ d.holiday }}</span>{% endif %}
+          </div>
+          {% if d.events %}
+          <div class="chips">
+            {% for c in d.events %}{{ chip(c) }}{% endfor %}
+          </div>
+          {% if d.hidden %}
+          <button type="button" class="cal-more" data-cal-more data-more-text="+{{ d.hidden }} 更多">+{{ d.hidden }} 更多</button>
+          {% endif %}
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="card-b flush">
+    {% if groups %}
+    <div class="cal-list">
+      {% for g in groups %}
+      <section class="cal-day{% if g.day == today %} is-today{% endif %}">
+        <div class="cal-day-h">
+          <span class="cal-day-d">{{ g.day.strftime('%m-%d') }}</span>
+          <span class="cal-day-w">{{ g.weekday }}</span>
+          <span class="badge{% if g.day == today %} badge-accent{% endif %}">{{ g.label }}</span>
+          <span class="muted small">{{ g.events|length }} 个</span>
+        </div>
+        <ul class="cal-rows">
+          {% for c in g.events %}
+          <li>
+            <button type="button" class="cal-item tone-{{ c.tone }}{% if c.holding %} is-hold{% endif %}{% if not c.confirmed %} is-est{% endif %}"
+                    data-ev-key="{{ c.key }}" title="{{ c.tooltip }}" aria-haspopup="dialog">
+              <span class="cal-item-t num">{{ c.time_label or '全天' }}</span>
+              <span class="cal-item-bar" aria-hidden="true"></span>
+              <span class="cal-item-tag">{{ c.tag }}</span>
+              <span class="cal-item-x">{{ c.title }}</span>
+              <span class="cal-item-meta">
+                {% if c.category == 'company' %}<span class="muted small mono">{{ c.event.symbol|display }}</span>{% endif %}
+                {% if c.holding %}<span class="badge badge-accent">持仓</span>{% endif %}
+                {% if not c.confirmed %}<span class="badge badge-outline">预计</span>{% endif %}
+              </span>
+            </button>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">未来 {{ days }} 天{% if cat != 'all' %}没有「{{ categories[cat] }}」类的事件{% else %}没有事件{% endif %}。</div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="card-f cal-foot">
+    <div class="cal-legend" aria-label="图例">
+      {% for tone, name in legend %}<span class="lg tone-{{ tone }}"><i></i>{{ name }}</span>{% endfor %}
+      <span class="lg lg-est"><i></i>虚线 = 预计日期</span>
+    </div>
+    {% if beyond %}
+    <div class="note">只收集到 {{ horizon.strftime('%m-%d') }}（未来 {{ lookahead }} 天），之后的日期还没有数据。</div>
+    {% endif %}
+  </div>
+</div>
+
+<dialog id="cal-dialog" class="cal-dialog" aria-labelledby="cal-dialog-h">
+  <div class="cal-dialog-h">
+    <span id="cal-dialog-h">事件详情</span>
+    <button type="button" class="icon-btn" data-cal-close aria-label="关闭">✕</button>
+  </div>
+  <div id="cal-dialog-body" class="cal-dialog-b" aria-live="polite"></div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}<script src="{{ static('js/calendar.js') }}"></script>{% endblock %}

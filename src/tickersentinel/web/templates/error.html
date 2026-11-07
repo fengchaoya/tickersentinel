@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} · tickersentinel{% endblock %}
+{% block content %}
+<div class="card"><div class="empty">
+  <h1 style="font-size:40px;margin-bottom:8px">{{ code }}</h1>
+  <p>{{ message }}</p>
+  <p><a href="/">回到总览</a></p>
+</div></div>
+{% endblock %}

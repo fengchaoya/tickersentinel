@@ -1,0 +1,14 @@
+{
+  "name": "tickersentinel",
+  "short_name": "tickersentinel",
+  "description": "按持仓定制的盯盘与投研小助理（本机网页）",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0e1117",
+  "theme_color": "#1c2a4a",
+  "lang": "zh-CN",
+  "icons": [
+    {"src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}

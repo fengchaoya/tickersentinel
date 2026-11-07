@@ -1,0 +1,7 @@
+{# 网页提问的最近几轮问答（pages/chat.py）。问题是纯文字（自动转义），回答是 markdown 转好的 HTML #}
+{%- for t in turns %}
+<div class="chat-msg chat-{{ t.role }}">{{ t.html }}</div>
+{%- endfor %}
+{%- if not chat_ready %}
+<div class="chat-note muted small">这个网页没有接上对话功能。</div>
+{%- endif %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}总览 · tickersentinel{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static('css/overview.css') }}">{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>总览</h1>
+    <div class="sub">
+      <span id="ov-clock" data-tz="{{ settings.timezone }}">{{ now|local('%Y-%m-%d') }} {{ now|weekday }} {{ now|local('%H:%M') }} {{ now|tzabbr }}</span>
+      <span class="muted"> · 持仓 {{ u.symbols|length }} 只</span>
+    </div>
+  </div>
+</div>
+
+{# 左边一个大面板，两个选项卡（2026-11-01 用户选定）：对话（默认；和飞书同一个会话）| 消息流（和飞书里收到的一样）。
+   选中的那个占满整屏高度；浏览器记住上次停在哪个；在对话里时，消息流照样实时接收，选项卡上显示未读数。
+   运行状态在顶栏右侧的小标里（悬停看详情） #}
+<div class="ov-grid">
+  <section class="card ov-main" aria-label="对话与消息流">
+    <div class="ov-tabs" role="tablist" aria-label="对话 / 消息流">
+      <button type="button" role="tab" class="ov-tab on" id="tab-btn-chat" data-tab="chat" aria-controls="tab-chat" aria-selected="true">对话</button>
+      <button type="button" role="tab" class="ov-tab" id="tab-btn-feed" data-tab="feed" aria-controls="tab-feed" aria-selected="false">
+        消息流<span class="ov-unread" id="ov-unread" hidden></span></button>
+      <div class="actions">
+        <span id="ov-live" class="ov-live" title="正在连接实时推送"><span class="ov-live-dot"></span>实时</span>
+      </div>
+    </div>
+
+    <div id="tab-chat" class="ov-pane ov-chat" role="tabpanel" aria-labelledby="tab-btn-chat">
+      <div id="chat-log" class="chat-log" hx-get="/partials/chat"
+           hx-trigger="load, every 60s[!document.querySelector('#chat-log .chat-wait')]" hx-swap="innerHTML"></div>
+      <div id="chat-ctx" class="chat-ctx" hidden>
+        <span class="chat-ctx-l">关于这条推送：</span><span class="chat-ctx-t" id="chat-ctx-t"></span>
+        <button type="button" class="chat-ctx-x" id="chat-ctx-x" title="不带这条推送" aria-label="不带这条推送">×</button>
+      </div>
+      <form id="chat-form" class="chat-form" autocomplete="off">
+        <textarea id="chat-input" rows="2" maxlength="2000" aria-label="向模型提问"
+                  placeholder="问一句：MU 今天为什么跌？下周有哪些宏观数据？（Enter 发送，Shift+Enter 换行，/new 开始新对话；消息流里每条推送都可以点“问一下”）"></textarea>
+        <button type="submit" class="btn btn-primary" id="chat-send">发送</button>
+      </form>
+    </div>
+
+    <div id="tab-feed" class="ov-pane" role="tabpanel" aria-labelledby="tab-btn-feed" hidden>
+      <div id="ov-feed" class="feed" data-after="{{ after }}" aria-live="polite">
+        {% include "overview/_feed.html" %}
+      </div>
+    </div>
+  </section>
+
+  <aside class="ov-side">
+    <section class="card">
+      <div class="card-h">
+        <h2>宏观看板</h2>
+        <div class="actions">
+          <a class="small" href="/macro">看趋势 →</a>
+          <span class="spinner htmx-indicator" id="ov-macro-ind"></span>
+          <button type="button" class="btn btn-sm" title="重新取一次" hx-get="/partials/overview/macro" hx-target="#ov-macro"
+                  hx-swap="innerHTML" hx-indicator="#ov-macro-ind">刷新</button>
+        </div>
+      </div>
+      <div id="ov-macro" class="card-b ov-macro" hx-get="/partials/overview/macro" hx-trigger="load, every 60s"
+           hx-swap="innerHTML" hx-indicator="#ov-macro-ind">
+        <div class="mq-skel">
+          <div class="skeleton" style="width: 40%"></div>
+          <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton" style="width: 80%"></div>
+          <div class="skeleton" style="width: 35%"></div>
+          <div class="skeleton"></div><div class="skeleton" style="width: 70%"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h">
+        <h2>今明日程</h2>
+        <div class="actions"><a class="small" href="/calendar">完整日历 →</a></div>
+      </div>
+      <div id="ov-events" class="card-b ov-events" hx-get="/partials/overview/events" hx-trigger="every 10m" hx-swap="innerHTML">
+        {% include "overview/_events.html" %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h">
+        <h2>今日异动</h2>
+        <div class="actions"><a class="small" href="/alerts">全部异动 →</a></div>
+      </div>
+      <div id="ov-today" class="card-b flush ov-today" hx-get="/partials/overview/alerts" hx-trigger="every 60s, tsen:alert from:body"
+           hx-swap="innerHTML">
+        {% include "overview/_today.html" %}
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ static('js/overview.js') }}"></script>{% endblock %}

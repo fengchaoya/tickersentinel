@@ -1,0 +1,148 @@
+/* 事件日历页：月历网格、事件小标签（chip）、列表视图、详情对话框。只用 app.css 的设计变量，浅色 / 深色自动切换。
+   配色：每个 .tone-* 定义 --tc（主色）与 --tc-soft（底色），chip、列表行、图例、详情共用。 */
+
+.tone-fed { --tc: var(--purple); --tc-soft: var(--purple-soft); }
+.tone-us { --tc: var(--accent); --tc-soft: var(--accent-soft); }
+.tone-ust { --tc: var(--teal); --tc-soft: var(--teal-soft); }
+.tone-boj { --tc: var(--amber); --tc-soft: var(--amber-soft); }
+.tone-kr { --tc: color-mix(in srgb, var(--accent) 55%, var(--purple)); --tc-soft: color-mix(in srgb, var(--accent-soft) 50%, var(--purple-soft)); }
+.tone-mkt, .tone-macro { --tc: var(--muted); --tc-soft: var(--panel-3); }
+.tone-hold { --tc: var(--accent); --tc-soft: var(--accent-soft); }
+.tone-co, .tone-custom { --tc: var(--border-strong); --tc-soft: var(--panel-2); }
+.tone-insider { --tc: var(--amber); --tc-soft: var(--amber-soft); }
+.tone-lockup { --tc: var(--red); --tc-soft: var(--red-soft); }
+
+/* ── 顶部 ── */
+.cal-toolbar { gap: 10px; }
+.cal-alert { background: var(--amber-soft); color: var(--amber); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 8px 12px; font-size: 13px; margin-bottom: 12px; }
+.cal-alert code { color: inherit; }
+.cal-head { flex-wrap: wrap; row-gap: 8px; }
+.cal-nav { gap: 6px; }
+.cal-nav .btn-sm { min-width: 28px; justify-content: center; font-size: 15px; }
+.cal-nav .btn-sm:last-child { font-size: 12px; }
+.cal-title { font-size: 15px; min-width: 112px; text-align: center; font-variant-numeric: tabular-nums; }
+.cal-head > h2.cal-title { text-align: left; min-width: 0; }
+.cal-count { margin-left: 4px; }
+
+/* ── 月历 ── */
+.cal-grid { display: flex; flex-direction: column; }
+.cal-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.cal-wd { border-bottom: 1px solid var(--border); }
+.cal-wd-c { padding: 7px 10px; font-size: 12px; color: var(--muted); font-weight: 500; }
+.cal-wd-c.is-weekend { color: color-mix(in srgb, var(--muted) 75%, transparent); }
+.cal-cell { min-height: 118px; padding: 6px 6px 8px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px; min-width: 0; position: relative; }
+.cal-row > .cal-cell:last-child { border-right: 0; }
+.cal-row:last-child > .cal-cell { border-bottom: 0; }
+.cal-cell.is-weekend { background: color-mix(in srgb, var(--panel-2) 55%, transparent); }
+.cal-cell.is-holiday { background: color-mix(in srgb, var(--panel-3) 60%, transparent); }
+.cal-cell.is-out .cal-dh, .cal-cell.is-out .chips, .cal-cell.is-out .cal-more { opacity: 0.45; }
+.cal-cell.is-past:not(.is-out) .chips { opacity: 0.62; }
+.cal-cell.is-past .cal-dn { color: var(--muted); }
+.cal-cell.is-today { box-shadow: inset 0 0 0 1.5px var(--accent); background: color-mix(in srgb, var(--accent-soft) 40%, transparent); }
+
+.cal-dh { display: flex; align-items: center; gap: 6px; padding: 0 2px 2px; min-height: 22px; }
+.cal-dn { font-size: 12.5px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.cal-cell.is-today .cal-dn { background: var(--accent); color: #fff; border-radius: 999px; min-width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; }
+.cal-today { font-size: 11px; color: var(--accent); font-weight: 600; }
+.cal-hol { margin-left: auto; font-size: 10.5px; color: var(--muted); border: 1px solid var(--border-strong); border-radius: 999px;
+  padding: 1px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.chips { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cal-cell:not(.expanded) .chips > .chip:nth-child(n+5) { display: none; }
+.chip { display: flex; align-items: baseline; gap: 5px; width: 100%; min-width: 0; text-align: left; cursor: pointer;
+  font: 11.5px/1.35 var(--font); color: var(--text-2); background: var(--tc-soft); border: 1px solid transparent;
+  border-left: 2px solid var(--tc); border-radius: 4px; padding: 2px 6px 2px 5px; }
+.chip:hover { color: var(--text); background: color-mix(in srgb, var(--tc-soft) 70%, var(--panel-3)); }
+.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.chip-t { flex: none; color: var(--tc); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 11px; }
+.tone-co .chip-t, .tone-custom .chip-t, .tone-co.chip-t { color: var(--muted); }
+.chip-x { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip.is-hold { color: var(--text); font-weight: 600; border-left-width: 3px; }
+.chip.is-est { background: transparent; border: 1px dashed color-mix(in srgb, var(--tc) 70%, var(--border-strong));
+  border-left: 2px dashed var(--tc); }
+.tone-co.chip.is-est, .tone-custom.chip.is-est { border-color: var(--border-strong); }
+
+.cal-more { align-self: flex-start; border: 0; background: none; color: var(--accent); font: 11.5px var(--font); padding: 1px 4px;
+  cursor: pointer; border-radius: 4px; }
+.cal-more:hover { background: var(--accent-soft); }
+.cal-cell.expanded { z-index: 1; }
+
+/* ── 列表 ── */
+.cal-list { display: flex; flex-direction: column; }
+.cal-day { border-bottom: 1px solid var(--border); }
+.cal-day:last-child { border-bottom: 0; }
+.cal-day-h { display: flex; align-items: center; gap: 8px; padding: 10px 16px 6px; position: sticky; top: var(--topbar-h);  /* 贴在顶栏下面 */
+  background: var(--panel); z-index: 2; }
+.cal-day-d { font-weight: 650; font-size: 14px; font-variant-numeric: tabular-nums; }
+.cal-day-w { color: var(--muted); font-size: 13px; }
+.cal-day.is-today .cal-day-d { color: var(--accent); }
+.cal-rows { list-style: none; margin: 0; padding: 0 8px 8px; }
+.cal-item { display: grid; grid-template-columns: 52px 3px 72px minmax(0, 1fr) auto; align-items: center; gap: 10px;
+  width: 100%; text-align: left; background: none; border: 0; border-radius: var(--radius-sm); padding: 7px 8px;
+  font: 13.5px/1.4 var(--font); color: var(--text-2); cursor: pointer; }
+.cal-item:hover { background: var(--panel-2); }
+.cal-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.cal-item-t { color: var(--muted); font-size: 12.5px; text-align: right; white-space: nowrap; }
+.cal-item-bar { width: 3px; height: 18px; border-radius: 2px; background: var(--tc); }
+.cal-item.is-est .cal-item-bar { background: repeating-linear-gradient(var(--tc) 0 3px, transparent 3px 5px); }
+.cal-item-tag { font-size: 11.5px; color: var(--tc); background: var(--tc-soft); border-radius: 999px; padding: 2px 8px;
+  justify-self: start; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.tone-co .cal-item-tag, .tone-custom .cal-item-tag, .tone-mkt .cal-item-tag { color: var(--text-2); }
+.cal-item-x { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-item.is-hold .cal-item-x { color: var(--text); font-weight: 600; }
+.cal-item-meta { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+/* ── 底部：图例与收集范围 ── */
+.cal-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; justify-content: space-between; }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--muted); }
+.lg { display: inline-flex; align-items: center; gap: 5px; }
+.lg i { width: 10px; height: 10px; border-radius: 3px; background: var(--tc-soft); border-left: 3px solid var(--tc); }
+.lg-est i { background: transparent; border: 1px dashed var(--muted); }
+
+.cal-empty { padding: 48px 16px; line-height: 1.8; }
+.cal-empty-t { font-size: 15px; color: var(--text-2); font-weight: 600; margin-bottom: 4px; }
+
+/* ── 详情对话框 ── */
+.cal-dialog { width: min(520px, calc(100vw - 24px)); max-height: min(80vh, 720px); padding: 0; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--panel); color: var(--text); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22); }
+.cal-dialog::backdrop { background: rgba(10, 14, 22, 0.42); }
+.cal-dialog-h { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px 10px 16px;
+  border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--muted); position: sticky; top: 0; background: var(--panel); }
+.cal-dialog-b { padding: 14px 16px 16px; min-height: 120px; }
+.cal-dialog-b .skeleton + .skeleton { margin-top: 10px; }
+.cal-dialog-err { color: var(--red); font-size: 13px; padding: 12px 0; }
+
+.ev-badges { gap: 6px; margin-bottom: 10px; }
+.ev-tone-badge { background: var(--tc-soft); color: var(--tc); }
+.tone-co .ev-tone-badge, .tone-custom .ev-tone-badge, .tone-mkt .ev-tone-badge { color: var(--text-2); }
+.ev-ok { background: var(--panel-2); color: var(--text-2); }
+.ev-title { font-size: 16px; line-height: 1.45; margin-bottom: 12px; overflow-wrap: anywhere; }
+.ev-rows { margin: 0; display: flex; flex-direction: column; border-top: 1px solid var(--border); }
+.ev-row { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border);
+  font-size: 13px; }
+.ev-row dt { color: var(--muted); }
+.ev-row dd { margin: 0; color: var(--text-2); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.ev-foot { margin-top: 12px; }
+.ev-key { max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ev-missing { padding: 24px 8px; line-height: 1.8; }
+
+/* ── 窄屏：月历只显示色块，点开看详情；建议用列表视图 ── */
+@media (max-width: 760px) {
+  .cal-cell { min-height: 64px; padding: 4px 3px; }
+  .cal-wd-c { padding: 6px 4px; text-align: center; }
+  .cal-dh { justify-content: center; padding: 0; }
+  .cal-today, .cal-hol { display: none; }
+  .chips { flex-direction: row; flex-wrap: wrap; gap: 3px; justify-content: center; }
+  .chip { display: block; width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 0; background: var(--tc); }
+  .chip.is-est { background: transparent; border: 1.5px dashed var(--tc); }
+  .tone-co.chip { background: var(--muted); }
+  .chip-t, .chip-x { display: none; }
+  .cal-cell:not(.expanded) .chips > .chip:nth-child(n+5) { display: block; }  /* 色点放得下，全部显示 */
+  .cal-more { display: none; }
+  .cal-item { grid-template-columns: 44px 3px minmax(0, 1fr); row-gap: 2px; }
+  .cal-item-tag { display: none; }
+  .cal-item-meta { grid-column: 3; }
+}

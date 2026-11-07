@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- EDGAR 0001958244-26-000662（非本项目标的，所有元素都带 ns2: 前缀），删减同上；人名已替换 --><ns2:edgarSubmission xmlns:com="http://www.sec.gov/edgar/common" xmlns:ns2="http://www.sec.gov/edgar/ownership">
+    <ns2:headerData>
+        <ns2:submissionType>144</ns2:submissionType>
+    </ns2:headerData>
+    <ns2:formData>
+        <ns2:issuerInfo>
+            <ns2:issuerCik>0001868275</ns2:issuerCik>
+            <ns2:issuerName>Constellation Energy Corporation</ns2:issuerName>
+            <ns2:nameOfPersonForWhoseAccountTheSecuritiesAreToBeSold>Jane Doe</ns2:nameOfPersonForWhoseAccountTheSecuritiesAreToBeSold>
+            <ns2:relationshipsToIssuer>
+                <ns2:relationshipToIssuer>Officer</ns2:relationshipToIssuer>
+            </ns2:relationshipsToIssuer>
+        </ns2:issuerInfo>
+        <ns2:securitiesInformation>
+            <ns2:securitiesClassTitle>Common Stock</ns2:securitiesClassTitle>
+            <ns2:brokerOrMarketmakerDetails>
+                <ns2:name>Goldman Sachs &amp; Co. LLC</ns2:name>
+            </ns2:brokerOrMarketmakerDetails>
+            <ns2:noOfUnitsSold>29727</ns2:noOfUnitsSold>
+            <ns2:aggregateMarketValue>8174925</ns2:aggregateMarketValue>
+            <ns2:noOfUnitsOutstanding>354307379</ns2:noOfUnitsOutstanding>
+            <ns2:approxSaleDate>10/15/2026</ns2:approxSaleDate>
+            <ns2:securitiesExchangeName>NASD</ns2:securitiesExchangeName>
+        </ns2:securitiesInformation>
+        <ns2:remarks>The sales of shares set forth herein are made in connection with a selling plan dated 05/18/2026 that is intended to comply with Rule 10b5-1(c).</ns2:remarks>
+        <ns2:noticeSignature>
+            <ns2:noticeDate>10/15/2026</ns2:noticeDate>
+            <ns2:planAdoptionDates>
+                <ns2:planAdoptionDate>05/18/2026</ns2:planAdoptionDate>
+            </ns2:planAdoptionDates>
+        </ns2:noticeSignature>
+    </ns2:formData>
+</ns2:edgarSubmission>

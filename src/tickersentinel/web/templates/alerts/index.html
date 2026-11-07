@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}异动 · tickersentinel{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static('css/alerts.css') }}">{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>异动</h1>
+    <div class="sub">每一次急涨急跌的记录：触发条件、板块 / 个股拆分、当时的归因与你的标注。时间为 {{ now|tzabbr }}（{{ settings.timezone }}）。</div>
+  </div>
+  <div class="row">
+    <a class="btn btn-sm" href="{{ csv_href }}" download title="按当前筛选导出全部记录（UTF-8，Excel 可直接打开）">导出 CSV</a>
+  </div>
+</div>
+
+<form class="card filter-bar" method="get" action="/alerts" data-autosubmit>
+  <div class="seg-ctl" role="group" aria-label="时间范围">
+    {% for key, name, _ in ranges %}
+    <a href="/alerts{{ f.query(range=key) }}" class="{% if f.range == key %}on{% endif %}"{% if f.range == key %} aria-current="true"{% endif %}>{{ name }}</a>
+    {% endfor %}
+  </div>
+  <input type="hidden" name="range" value="{{ f.range }}">
+  <label class="fb-item"><span>代码</span>
+    <select name="symbol">
+      <option value="">全部</option>
+      {% for o in symbols %}<option value="{{ o.value }}"{% if f.symbol == o.value %} selected{% endif %}>{{ o.text }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="fb-item"><span>时段</span>
+    <select name="seg">
+      <option value="">全部</option>
+      {% for key, name in segments %}<option value="{{ key }}"{% if f.seg == key %} selected{% endif %}>{{ name }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="fb-item"><span>规则</span>
+    <select name="rule">
+      <option value="">全部</option>
+      {% for key, name in rules %}<option value="{{ key }}"{% if f.rule == key %} selected{% endif %}>{{ name }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="fb-item"><span>标注</span>
+    <select name="labeled">
+      <option value="">全部</option>
+      {% for key, name in labeled_opts %}<option value="{{ key }}"{% if f.labeled == key %} selected{% endif %}>{{ name }}</option>{% endfor %}
+    </select>
+  </label>
+  <noscript><button class="btn btn-sm" type="submit">筛选</button></noscript>
+  {% if f.active %}<a class="btn btn-sm fb-clear" href="/alerts{{ f.query(symbol='', seg='', rule='', labeled='') }}">清除筛选</a>{% endif %}
+</form>
+
+{% if summary.total %}
+<div class="summary-line">
+  <span class="sum-total"><strong class="num">{{ summary.total }}</strong> 条</span>
+  <span class="muted small">涨 <span class="up num">{{ summary.up }}</span> · 跌 <span class="down num">{{ summary.down }}</span></span>
+  <span class="sum-sep"></span>
+  {% for s in summary.symbols[:12] %}
+  <a class="chip{% if f.symbol == s.symbol %} on{% endif %}" href="/alerts{{ f.query(symbol='' if f.symbol == s.symbol else s.symbol) }}" title="只看 {{ s.display }}">{{ s.display }} <span class="num">{{ s.count }}</span></a>
+  {% endfor %}
+  {% if summary.symbols|length > 12 %}<span class="muted small">等 {{ summary.symbols|length }} 个</span>{% endif %}
+  <span class="sum-sep"></span>
+  {% for s in summary.segments %}
+  <a class="chip chip-quiet{% if f.seg == s.seg %} on{% endif %}" href="/alerts{{ f.query(seg='' if f.seg == s.seg else s.seg) }}">{{ s.name }} <span class="num">{{ s.count }}</span></a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
+  {% if not groups %}
+    <div class="empty">
+      {% if total_all == 0 %}
+        <p><strong>还没有异动记录</strong></p>
+        <p>tsen run 检测到急涨急跌时会记在这里（只在出现异动时才有记录）。</p>
+      {% else %}
+        <p><strong>这个筛选条件下没有异动</strong></p>
+        <p>
+          {% if f.range != 'all' %}<a href="/alerts{{ f.query(range='all') }}">看全部时间</a>{% endif %}
+          {% if f.active %}{% if f.range != 'all' %} · {% endif %}<a href="/alerts{{ f.query(symbol='', seg='', rule='', labeled='') }}">清除筛选</a>{% endif %}
+        </p>
+      {% endif %}
+    </div>
+  {% else %}
+  <div class="table-wrap">
+    <table class="data alerts-table">
+      <thead>
+        <tr>
+          <th>时间</th><th>代码</th><th>时段</th><th>触发</th><th class="num">涨跌</th><th class="num">较参照</th>
+          <th>拆分</th><th>归因</th><th>标注</th>
+        </tr>
+      </thead>
+      {% for g in groups %}
+      <tbody>
+        <tr class="day-row"><th colspan="9">{{ g.title }} <span class="muted">· {{ g.rows|length }} 条</span></th></tr>
+        {% for v in g.rows %}
+        <tr class="clickable{% if v.broken %} broken{% endif %}" data-href="/alerts/{{ v.id }}">
+          <td class="nowrap"><a class="t-link" href="/alerts/{{ v.id }}"><span class="num">{{ v.ts|local('%H:%M') }}</span></a>
+            <div class="muted small num">{{ v.ts|local('%m-%d') }}</div></td>
+          <td class="nowrap">
+            <strong class="sym">{{ v.display }}</strong>
+            {% if v.kind %}<span class="badge badge-outline">{{ v.kind }}</span>{% endif %}
+            {% if v.name %}<div class="muted small ellipsis" title="{{ v.name }}">{{ v.name }}</div>{% endif %}
+          </td>
+          <td><span class="badge {{ v.seg_badge }}">{{ v.seg_name }}</span></td>
+          <td class="trig" title="{{ v.describes|join('；') }}">
+            <span>{{ v.headline }}</span>
+            {% if v.is_escalation %}<span class="badge badge-amber">扩大</span>{% endif %}
+            {% if v.describes|length > 1 %}<span class="muted small">+{{ v.describes|length - 1 }}</span>{% endif %}
+          </td>
+          <td class="num nowrap {{ 'up' if v.direction > 0 else 'down' if v.direction < 0 else 'flat' }}">
+            {{ '▲' if v.direction > 0 else '▼' if v.direction < 0 else '' }} {{ v.move_pct|pct }}
+          </td>
+          <td class="num nowrap"><span class="{{ v.day_change_pct|ud }}">{{ v.day_change_pct|pct }}</span>
+            <div class="muted small">{{ v.ref_label }}</div></td>
+          <td class="split-cell">
+            {% if v.sector_pct is not none and v.idio_pct is not none %}
+              {% if v.bar %}<div class="split-bar" title="板块 {{ v.bar.sector }}% · 个股 {{ v.bar.idio }}%（按绝对值）"><i class="sb-sector" style="width: {{ v.bar.sector }}%"></i><i class="sb-idio" style="width: {{ v.bar.idio }}%"></i></div>{% endif %}
+              <div class="small nowrap">板块 <span class="{{ v.sector_pct|ud }}">{{ v.sector_pct|pct }}</span> · 个股 <span class="{{ v.idio_pct|ud }}">{{ v.idio_pct|pct }}</span></div>
+            {% else %}<span class="muted">—</span>{% endif %}
+          </td>
+          <td class="attr-cell">
+            {% if v.same_wave_as %}
+              <span class="badge badge-outline">同一波</span> <a href="/alerts/{{ v.same_wave_as }}" class="small">见 #{{ v.same_wave_as }}</a>
+            {% elif v.summary %}
+              {% if v.driver %}<span class="badge {{ v.driver_badge }}">{{ v.driver }}</span>{% endif %}
+              <span class="small" title="{{ v.summary }}">{{ v.summary|truncate(56, true, '…') }}</span>
+            {% else %}<span class="muted small">还没有归因</span>{% endif %}
+          </td>
+          <td class="label-cell">
+            {% if v.label %}<span class="small" title="{{ v.label }}{% if v.notes %}（{{ v.notes }}）{% endif %}">{{ v.label|truncate(28, true, '…') }}</span>
+            {% elif v.notes %}<span class="small muted" title="{{ v.notes }}">备注：{{ v.notes|truncate(20, true, '…') }}</span>
+            {% else %}<span class="muted">—</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      {% endfor %}
+    </table>
+  </div>
+  {% if truncated %}
+  <div class="card-f note">只显示最近 {{ max_rows }} 条（共 {{ summary.total }} 条）：缩小时间范围，或导出 CSV 看全部。</div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ static('js/alerts.js') }}"></script>{% endblock %}

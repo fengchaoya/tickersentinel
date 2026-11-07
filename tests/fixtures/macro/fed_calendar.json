@@ -1,0 +1,518 @@
+﻿{
+"events": [
+{
+"description": "Conversation between IMF Managing Director Georgieva and Federal Reserve Chairman Warsh",
+"live": "https://www.youtube.com/watch?v=T20jWBJ66X0&list=PLGHsBhoupusk&index=31",
+"location": "At the Fireside Chat with International Monetary Fund (IMF) Managing Director Kristalina Georgieva, Bangkok, Thailand",
+"title": "Discussion - Chairman Kevin Warsh",
+"time": "11:30 p.m.",
+"month": "2026-10",
+"days": "15",
+"type": "Speeches"
+},
+{
+"description": "Supervision and Regulation",
+"live": "https://www.youtube.com/live/V7H5F2C5PNc",
+"location": "At the Bangkok Economic Festival 2026",
+"title": "Speech - Vice Chair for Supervision Michelle W. Bowman",
+"time": "10:55 p.m.",
+"month": "2026-10",
+"days": "14",
+"type": "Speeches"
+},
+{
+"description": "Supervision and Regulation",
+"location": "At the 2026 IIF Annual Membership Summit, Bangkok, Thailand",
+"title": "Discussion - Vice Chair for Supervision Michelle W. Bowman",
+"time": "5:40 a.m.",
+"month": "2026-10",
+"days": "14",
+"type": "Speeches"
+},
+{
+"description": "AI",
+"live": "https://www.youtube.com/@BloombergNewEconomy",
+"location": "At the Bloomberg New Economy Forum 2026, New Delhi, India",
+"title": "Discussion - Governor Christopher J. Waller",
+"time": "3:45 a.m.",
+"month": "2026-10",
+"days": "13",
+"type": "Speeches"
+},
+{
+"description": "Economic Outlook",
+"live": "https://istanbulef.org/eng/yayin/",
+"location": "At the Central Bank of the Republic of Türkiye (TCMB) İstanbul Economic Forum, Ümraniye/İstanbul, Türkiye ",
+"title": "Speech - Governor Christopher J. Waller",
+"time": "4:30 a.m.",
+"month": "2026-10",
+"days": "8",
+"type": "Speeches"
+},
+{
+"description": "Modernizing Regulation and Supervision",
+"live": "https://www.communitybanking.org/",
+"location": "At the 2026 Community Banking Research Conference, St. Louis, Missouri",
+"title": "Speech - Vice Chair for Supervision Michelle W. Bowman",
+"time": "10:45 a.m.",
+"month": "2026-10",
+"days": "6",
+"type": "Speeches"
+},
+{
+"description": "Global Central Banking",
+"location": "At the Central Banking Seminar (Virtual)",
+"title": "Discussion - Governor Lisa D. Cook ",
+"time": "3:30 p.m.",
+"month": "2026-10",
+"days": "1",
+"type": "Speeches"
+},
+{
+"description": "Modernizing Financial Regulation: Initial Observations from eSLR",
+"live": "https://www.youtube.com/watch?v=UosIN7C-ZCE",
+"location": "At the Atlantic Council&#8217;s Conversation with Michelle W. Bowman, Washington, D.C.",
+"title": "Speech - Vice Chair for Supervision Michelle W. Bowman",
+"time": "3:00 p.m.",
+"month": "2026-10",
+"days": "1",
+"type": "Speeches"
+},
+{
+"description": "U.S. Economy and Monetary Policy",
+"live": "https://darden-virginia.zoom.us/j/92232791521",
+"location": "At a Talk and Q&amp;A with Federal Reserve Board Vice Chair Philip N. Jefferson, Charlottesville, Va.",
+"title": "Speech - Vice Chair Philip N. Jefferson",
+"time": "1:30 p.m.",
+"month": "2026-10",
+"days": "1",
+"type": "Speeches"
+},
+{
+"description": "Federal Reserve Economic Data",
+"live": "https://www.youtube.com/live/1fK5omRbOvM?si=9mToIa7-cn6iDC9F",
+"location": "At FRED Con: Navigating Trust, AI &amp; Storytelling in a World of Data, St. Louis, Mo.",
+"title": "Speech - Governor Christopher J. Waller",
+"time": "10:00 a.m.",
+"month": "2026-10",
+"days": "1",
+"type": "Speeches"
+},
+{
+"description": "Rural Economy",
+"location": "At the 2026 Investing in Rural America Conference, Asheville, N.C.",
+"title": "Speech - Governor Lisa D. Cook ",
+"time": "3:25 p.m.",
+"month": "2026-09",
+"days": "30",
+"type": "Speeches"
+},
+{
+"description": "Payments",
+"live": "https://vimeo.com/event/6186977/6099e85d01",
+"location": "At the Sibos 2026 Conference, Miami Beach, Fla.",
+"title": "Speech - Governor Christopher J. Waller",
+"time": "3:00 p.m.",
+"month": "2026-09",
+"days": "29",
+"type": "Speeches"
+},
+{
+"description": "Economic Outlook",
+"live": "https://youtube.com/live/ZcKwcEHku7w",
+"location": "At A Conversation with Michael S. Barr on the State of the Economy, Detroit, Mich.",
+"title": "Speech - Governor Michael S. Barr",
+"time": "12:40 p.m.",
+"month": "2026-09",
+"days": "29",
+"type": "Speeches"
+},
+{
+"description": "Opening Remarks (via pre-recorded video)",
+"location": "At the Federal Reserve System Community Bank Cyber Workshop (Virtual)",
+"title": "Speech - Vice Chair for Supervision Michelle W. Bowman",
+"time": "11:00 a.m.",
+"month": "2026-09",
+"days": "29",
+"type": "Speeches"
+},
+{
+"description": "AI and Emerging Tech",
+"location": "At Oakland Tech Week 2026, Oakland, Calif.",
+"title": "Speech - Governor Lisa D. Cook",
+"time": "1:25 p.m.",
+"month": "2026-09",
+"days": "28",
+"type": "Speeches"
+},
+{
+"description": "Recent Developments in Bank Supervision and Regulation",
+"live": "https://teams.microsoft.com/meet/212992571985590?p=yY3nvqkkrbQw6RMUL6",
+"location": "At the Military Banking Summit 2026 (Virtual)",
+"title": "Discussion - Vice Chair for Supervision Michelle W. Bowman",
+"time": "8:15 a.m.",
+"month": "2026-09",
+"days": "28",
+"type": "Speeches"
+},
+{
+"description": "Economic Outlook and Housing",
+"live": "https://www.chicagofed.org/events/2026/housing-affordability-community-development-summit",
+"location": "At the Housing Affordability 2026: A Community Development Summit, Federal Reserve Bank of Chicago, Chicago, Ill.",
+"title": "Speech - Governor Michael S. Barr",
+"time": "10:05 a.m.",
+"month": "2026-09",
+"days": "23",
+"type": "Speeches"
+},
+{
+"description": "Discount Window Modernization and Treasury Market Functioning",
+"live": "https://www.newyorkfed.org/newsevents/events/markets/2026/0922-2026",
+"location": "At the 2026 Treasury Market Conference, Federal Reserve Bank of New York, New York. N.Y.",
+"title": "Speech - Vice Chair Philip N. Jefferson",
+"time": "10:20 a.m.",
+"month": "2026-09",
+"days": "22",
+"type": "Speeches"
+},
+{
+"description": "Stress Testing",
+"live": "https://www.youtube.com/live/WRJnz2auuZs",
+"location": "At a Chat with U.S. Federal Reserve Vice Chair for Supervision Michelle Bowman, London, United Kingdom",
+"title": "Speech - Vice Chair for Supervision Michelle W. Bowman",
+"time": "9:30 a.m.",
+"month": "2026-09",
+"days": "18",
+"type": "Speeches"
+},
+{
+"description": "Economic Outlook",
+"live": "https://events.reutersevents.com/reuters/newsmaker/christopherwaller",
+"location": "At the Reuters NEXT Newsmaker Interview (Virtual)",
+"title": "Speech - Governor Christopher J. Waller",
+"time": "8:30 a.m.",
+"month": "2026-09",
+"days": "3",
+"type": "Speeches"
+},
+{
+"description": "Economic Outlook and Financial Inclusion",
+"live": "https://jpmchase.zoom.us/j/95033879625",
+"location": "At the Second Chance Lending Forum, hosted by Prosperity Now and the Collateral Consequences Resource Center, Washington D.C.",
+"title": "Speech - Governor Michael S. Barr",
+"time": "9:05 a.m.",
+"month": "2026-09",
+"days": "1",
+"type": "Speeches"
+},
+{
+"description": "Keynote Remarks",
+"live": "https://www.youtube.com/KansasCityFed",
+"location": "At the 2026 Jackson Hole Economic Policy Symposium, Moran, Wyo.",
+"title": "Speech - Chairman Kevin Warsh",
+"time": "10:00 a.m.",
+"month": "2026-08",
+"days": "28",
+"type": "Speeches"
+},
+{
+"description": "Fireside Chat",
+"live": "https://us02web.zoom.us/j/86356148554?pwd=EztQe5OLfQRrz0b5Gla4fgTT2mhadm.1",
+"location": "At the 2026 CEO &amp; Senior Management Summit and Annual Meeting Speakers (Virtual)",
+"title": "Discussion - Vice Chair for Supervision Michelle W. Bowman",
+"time": "12:45 p.m.",
+"month": "2026-08",
+"days": "8",
+"type": "Speeches"
+},
+{
+"description": "Economic Outlook",
+"live": "https://zoom.us/meeting/register/HwGA9SMaQu-vrt_YA2ZJaw",
+"location": "At the Anchorage Economic Development Corporation (AEDC) 2026 Economic Luncheon, Anchorage, Alaska",
+"title": "Speech - Governor Lisa D. Cook  ",
+"time": "4:05 p.m.",
+"month": "2026-08",
+"days": "5",
+"type": "Speeches"
+},
+{
+"description": "Semiannual Monetary Policy Report to Congress",
+"live": "https://financialservices.house.gov/",
+"location": "Before the U.S. House Financial Services Committee",
+"title": "Testimony - Chairman Kevin Warsh",
+"time": "10:00 a.m.",
+"month": "2026-07",
+"days": "14",
+"type": "Testimony"
+},
+{
+"description": "Navigating Economic Shocks",
+"live": "https://www.youtube.com/watch?v=OFTWSRRkkCU",
+"location": "At In Conversation with Philip Jefferson, Stanford, California",
+"title": "Speech - Vice Chair Philip N. Jefferson",
+"time": "7:00 p.m.",
+"month": "2026-07",
+"days": "16",
+"type": "Speeches"
+},
+{
+"description": "The Economic Outlook",
+"location": "At the Exchequer Club Luncheon, Washington, D.C.",
+"title": "Speech - Governor Lisa D. Cook",
+"time": "1:00 p.m.",
+"month": "2026-07",
+"days": "15",
+"type": "Speeches"
+},
+{
+"description": "Semiannual Monetary Policy Report to Congress",
+"live": "https://www.banking.senate.gov/",
+"location": "Before the U.S. Senate Committee on Banking, Housing, and Urban Affairs",
+"title": "Testimony - Chairman Kevin Warsh",
+"time": "10:00 a.m.",
+"month": "2026-07",
+"days": "15",
+"type": "Testimony"
+},
+{
+"description": "Responsible Innovation and Financial Inclusion",
+"live": "https://www.federalreserve.gov",
+"location": "At the Federal Reserve Board Annual Financial Inclusion Conference, Washington, D.C. (via pre-recorded video)",
+"link": "https://www.federalreserve.gov/conferences/next-gen-financial-inclusion.htm",
+"title": "Speech - Vice Chair for Supervision Michelle W. Bowman",
+"time": "2:55 p.m.",
+"month": "2026-07",
+"days": "14",
+"type": "Speeches"
+},
+{
+"description": "Consumers, Artificial Intelligence, and Financial Inclusion: Balancing Opportunities and Challenges",
+"live": "https://www.federalreserve.gov",
+"location": "At the Federal Reserve Board Annual Financial Inclusion Conference, Washington, D.C.",
+"link": "https://www.federalreserve.gov/conferences/next-gen-financial-inclusion.htm",
+"title": "Discussion - Governor Lisa D. Cook",
+"time": "1:30 p.m.",
+"month": "2026-07",
+"days": "14",
+"type": "Speeches"
+},
+{
+"description": "Fireside Chat on Artificial Intelligence and Financial Inclusion",
+"live": "https://www.federalreserve.gov ",
+"location": "At the Federal Reserve Board Annual Financial Inclusion Conference, Washington, D.C.",
+"link": "https://www.federalreserve.gov/conferences/next-gen-financial-inclusion.htm",
+"title": "Discussion - Governor Michael S. Barr",
+"time": "12:55 p.m.",
+"month": "2026-07",
+"days": "14",
+"type": "Speeches"
+},
+{
+"description": "Artificial Intelligence",
+"live": "https://www.federalreserve.gov",
+"location": "At the Federal Reserve Board Annual Financial Inclusion Conference, Washington, D.C.",
+"link": "https://www.federalreserve.gov/conferences/next-gen-financial-inclusion.htm",
+"title": "Speech - Governor Michael S. Barr",
+"time": "12:40 p.m.",
+"month": "2026-07",
+"days": "14",
+"type": "Speeches"
+},
+{
+"description": "Economic Outlook",
+"live": "https://onemetlife.webex.com/onemetlife/j.php?MTID=mbbedc1dd8ba1351aa71d43af74b7592a",
+"location": "At New York Association for Business Economics (NYABE) hosts &quot;A Conversation with Governor Waller,&quot; New York, New York",
+"title": "Speech - Governor Christopher J. Waller",
+"time": "12:30 p.m.",
+"month": "2026-07",
+"days": "13",
+"type": "Speeches"
+},
+{
+"description": "Modernizing Financial Regulation",
+"location": "At the Bank Policy Institute (BPI) Roundtable (virtual)",
+"title": "Speech - Vice Chair for Supervision Michelle W. Bowman",
+"time": "5:25 a.m.",
+"month": "2026-07",
+"days": "13",
+"type": "Speeches"
+},
+{
+"description": "Opening Remarks",
+"live": "https://bis.webex.com/weblink/register/r9aa9d730e835650b169fda5f643ea536",
+"location": "At the Financial Stability Board Virtual Outreach Event",
+"title": "Speech - Vice Chair for Supervision Michelle W. Bowman",
+"time": "7:00 a.m.",
+"month": "2026-07",
+"days": "7",
+"type": "Speeches"
+},
+{
+"description": "Policy Panel",
+"location": "At the Closing Conference of the European System of Central Banks Research Network on Challenges for Monetary Policy Transmission in a Changing World, Rome, Italy",
+"title": "Discussion - Governor Christopher J. Waller",
+"time": "11:00 a.m.",
+"month": "2026-07",
+"days": "6",
+"type": "Speeches"
+},
+{
+"description": "Policy Panel Discussion",
+"live": "https://www.ecb.europa.eu/home/html/index.en.html",
+"location": "At the European Central Bank (ECB) Forum on Central Banking 2026, Sintra, Portugal",
+"title": "Discussion - Chairman Kevin Warsh",
+"time": "9:00 a.m.",
+"month": "2026-07",
+"days": "1",
+"type": "Speeches"
+},
+{
+"description": "&lt;p&gt;Meeting of December 8-9&lt;/p&gt;",
+"title": "FOMC Minutes",
+"time": "2:00 p.m.",
+"month": "2026-12",
+"days": "30",
+"type": "FOMC"
+},
+{
+"description": "&lt;p&gt;Meeting of October 27-28&lt;/p&gt;",
+"title": "FOMC Minutes",
+"time": "2:00 p.m.",
+"month": "2026-11",
+"days": "18",
+"type": "FOMC"
+},
+{
+"description": "&lt;p&gt;Meeting of September 15-16&lt;/p&gt;",
+"title": "FOMC Minutes",
+"time": "2:00 p.m.",
+"month": "2026-10",
+"days": "7",
+"type": "FOMC"
+},
+{
+"description": "&lt;p&gt;Meeting of July 28-29&lt;/p&gt;",
+"title": "FOMC Minutes",
+"time": "2:00 p.m.",
+"month": "2026-08",
+"days": "19",
+"type": "FOMC"
+},
+{
+"description": "&lt;p&gt;Meeting of June 16-17&lt;/p&gt;",
+"title": "FOMC Minutes",
+"time": "2:00 p.m.",
+"month": "2026-07",
+"days": "8",
+"type": "FOMC"
+},
+{
+"title": "Beige Book",
+"time": "2:00 p.m.",
+"month": "2026-11",
+"days": "25",
+"type": "Beige"
+},
+{
+"title": "Beige Book",
+"time": "2:00 p.m.",
+"month": "2026-10",
+"days": "14",
+"type": "Beige"
+},
+{
+"title": "Beige Book",
+"time": "2:00 p.m.",
+"month": "2026-09",
+"days": "2",
+"type": "Beige"
+},
+{
+"title": "Beige Book",
+"time": "2:00 p.m.",
+"month": "2026-07",
+"days": "15",
+"type": "Beige"
+},
+{
+"link": "https://www.federalreserve.gov/live-broadcast.htm",
+"title": "FOMC Press Conference",
+"time": "2:30 p.m.",
+"month": "2026-12",
+"days": "9",
+"type": "FOMC"
+},
+{
+"link": "https://www.federalreserve.gov/live-broadcast.htm",
+"title": "FOMC Press Conference",
+"time": "2:30 p.m.",
+"month": "2026-10",
+"days": "28",
+"type": "FOMC"
+},
+{
+"link": "https://www.federalreserve.gov/live-broadcast.htm",
+"title": "FOMC Press Conference",
+"time": "2:30 p.m.",
+"month": "2026-09",
+"days": "16",
+"type": "FOMC"
+},
+{
+"link": "https://www.federalreserve.gov/live-broadcast.htm",
+"title": "FOMC Press Conference",
+"time": "2:30 p.m.",
+"month": "2026-07",
+"days": "29",
+"type": "FOMC"
+},
+{
+"description": "&lt;p&gt;Two-day meeting, December 8 - 9&lt;/p&gt;&#10;&#10;&lt;p&gt;Press Conference&lt;/p&gt;",
+"title": "FOMC Meeting",
+"time": "2:00 p.m.",
+"month": "2026-12",
+"days": "9",
+"type": "FOMC"
+},
+{
+"description": "&lt;p&gt;Two-day meeting, October 27 - 28&lt;/p&gt;&#10;&#10;&lt;p&gt;Press Conference&lt;/p&gt;",
+"title": "FOMC Meeting",
+"time": "2:00 p.m.",
+"month": "2026-10",
+"days": "28",
+"type": "FOMC"
+},
+{
+"description": "&lt;p&gt;Two-day meeting, September 15 - 16&lt;/p&gt;&#10;&#10;&lt;p&gt;Press Conference&lt;/p&gt;",
+"title": "FOMC Meeting",
+"time": "2:00 p.m.",
+"month": "2026-09",
+"days": "16",
+"type": "FOMC"
+},
+{
+"description": "&lt;p&gt;Two-day meeting, July 28 - 29&lt;/p&gt;&#10;&#10;&lt;p&gt;Press Conference&lt;/p&gt;",
+"title": "FOMC Meeting",
+"time": "2:00 p.m.",
+"month": "2026-07",
+"days": "29",
+"type": "FOMC"
+},
+{
+"title": "G.5 - Foreign Exchange Rates",
+"time": "4:15 p.m.",
+"month": "2026-10",
+"days": "1",
+"type": "Stat"
+},
+{
+"description": "&lt;p&gt;Publication date for this release is approximate.&lt;/p&gt;",
+"title": "G.20 - Finance Companies",
+"time": "",
+"month": "2026-10",
+"days": "30",
+"type": "Stat"
+}
+],
+"announcement": []
+}

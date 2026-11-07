@@ -1,0 +1,10 @@
+{
+  "_note": "2026-10-21 只读探测 GET /open-apis/im/v1/messages?container_id_type=chat 的 sender 部分（按时间倒序；ID 已替换）：最近几条是机器人发的推送，最早一条是用户发给机器人的",
+  "senders": [
+    {"id": "cli_test", "id_type": "app_id", "sender_type": "app", "tenant_key": "tk"},
+    {"id": "cli_test", "id_type": "app_id", "sender_type": "app", "tenant_key": "tk"},
+    {"id": "cli_test", "id_type": "app_id", "sender_type": "app", "tenant_key": "tk"},
+    {"id": "cli_test", "id_type": "app_id", "sender_type": "app", "tenant_key": "tk"},
+    {"id": "ou_user_test", "id_type": "open_id", "sender_type": "user", "tenant_key": "tk"}
+  ]
+}

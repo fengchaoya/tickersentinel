@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN" data-up="{{ up_color }}" data-up-default="{{ up_color }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="tsen-token" content="{{ token }}">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}tickersentinel{% endblock %}</title>
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/icon.svg">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="stylesheet" href="{{ static('css/app.css') }}">
+  {% block head %}{% endblock %}
+  <script>
+    // 在样式生效前定下主题和涨跌配色，避免闪一下
+    (function () {
+      var h = document.documentElement;
+      try {
+        var t = localStorage.getItem("tsen.theme"); if (t) h.dataset.theme = t;
+        var u = localStorage.getItem("tsen.up"); if (u) h.dataset.up = u;
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body class="page-{{ nav or 'other' }}">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/" title="tickersentinel">
+        <img src="/static/icon.svg" alt="" width="22" height="22">
+        <span>tickersentinel</span>
+      </a>
+      <nav class="tabs" aria-label="主导航">
+        {% for key, name, href in nav_items %}
+        <a href="{{ href }}" class="tab{% if nav == key %} active{% endif %}"{% if nav == key %} aria-current="page"{% endif %}>{{ name }}</a>
+        {% endfor %}
+      </nav>
+      <div class="topbar-right">
+        <span id="status-dot" hx-get="/partials/status-dot" hx-trigger="load, every 30s" hx-swap="innerHTML">
+          <span class="dot dot-unknown"></span>
+        </span>
+        <button type="button" class="icon-btn" data-action="toggle-up" title="切换涨跌配色（红涨绿跌 / 绿涨红跌）">
+          <span class="up-sample">涨</span><span class="down-sample">跌</span>
+        </button>
+        <button type="button" class="icon-btn" data-action="toggle-theme" title="切换浅色 / 深色（跟随系统 → 浅色 → 深色）">
+          <span class="theme-label">◐</span>
+        </button>
+      </div>
+    </div>
+  </header>
+  {% if readonly %}
+  <div class="banner banner-warn">预览模式：用的是正式数据库的内存副本，网页里的改动（标注等）不会保存。</div>
+  {% endif %}
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{{ static('vendor/htmx.min.js') }}"></script>
+  <script src="{{ static('js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
